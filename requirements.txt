@@ -1,2 +1,5 @@
 lxml
 yfinance
+matplotlib
+numpy
+pandas
