@@ -14,21 +14,16 @@ import yfinance as yf
 from SymbList import SP500
 from names import names
 
-# download modules updates cached/stored stock market data
-from download import downloadData
-
 # apis give useful APIs to obtain data.
 from apis import getInfo
 
 # config gives acess to market and bots.
-from config import market, bots
+from config import db_market, db_bots, forestSize
 
 # Macro functions
-def timestamp(): return int(round(time() * 1000))
-def getName(): return choice(names)
+def createTimeStamp(): return int(round(time() * 1000))
+def createName(): return choice(names)
 # getInfo macro returns the stock data used in buy, sell and evaluate.
-
-
 
 class Bot:
     
@@ -37,19 +32,26 @@ class Bot:
         'cash': 100000,
         'portfolio': {},
     }):
-        self.id = epoch['id'] if 'id' in epoch else timestamp()
-        self.cash = epoch['cash']
-        self.portfolio = epoch['portfolio']
-        self.chars = epoch['chars'] if 'chars' in epoch else {
-            'growth': random(),
-            'value': random(),
-            'profitmargin': random()/5,
-            'stoplossmargin': random()/5,
-        }
-        self.bots = bots
-        self.name = epoch['name'] if 'name' in epoch else getName()
-        self.log = False
-
+        try:
+            self.name = epoch['name'] if 'name' in epoch else createName()
+            self.id = epoch['id'] if 'id' in epoch else createTimeStamp()
+            self.cash = epoch['cash']
+            self.portfolio = epoch['portfolio']
+            self.chars = epoch['chars'] if 'chars' in epoch else {
+                'growth': random(),
+                'value': random(),
+                'profitmargin': random()/5,
+                'stoplossmargin': random()/5,
+            }
+            self.db_bots = db_bots
+            self.history = epoch['history'] if 'history' in epoch else {
+                'evaluation': [],
+                'operations': []
+            }
+        except Exception as e:
+            print("Failed to initialize metadata: ",e)
+            raise
+        
     # Perform a self check on data validity.
     # TODO: perform more checks other than cash.
     def selfcheck(self):
@@ -58,14 +60,26 @@ class Bot:
 
     # Save the current bot to mongoDB.
     def save(self):
-        doc = {
-            'id': self.id,
-            'cash': self.cash,
-            'portfolio': self.portfolio,
-            'chars': self.chars,
-            'name': self.name
-        }
-        self.bots.replace_one({'id': doc['id']}, doc, True)
+        try:
+            doc = {
+                'id': self.id,
+                'cash': self.cash,
+                'portfolio': self.portfolio,
+                'chars': self.chars,
+                'name': self.name,
+                'history':self.history
+            }
+            self.db_bots.replace_one({'id': doc['id']}, doc, True)
+        except Exception as e:
+            print("Failed to save: ", e)
+            raise
+    # delete the current bot to mongoDB.
+    def delete(self):
+        try:
+            self.db_bots.delete_one({'id': self.id})
+        except Exception as e:
+            print("Failed to delete: ", e)
+            raise
 
 
     # buy 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
@@ -77,21 +91,24 @@ class Bot:
         trans = shares * stock['ask']
         if self.cash < trans:
             return
+
         else:
-            pick = stock['symbol']
-            if pick in self.portfolio:
-                position = self.portfolio[pick]
-                newAvgCost = (
-                    position['avgcost'] * position['shares'] + trans) / (shares + position['shares'])
-                position['avgcost'] = newAvgCost
-                position['shares'] += shares
-            else:
-                self.portfolio[stock['symbol']] = {
-                    'shares': shares, 'avgcost': stock['ask']}
-            self.cash -= trans
-        if self.log:
-            print("Buyed", shares, 'shares of ',
-                  stock['symbol'], 'at', stock['bid'], 'Cash: ', self.cash)
+            try:
+                pick = stock['symbol']
+                if pick in self.portfolio:
+                    position = self.portfolio[pick]
+                    newAvgCost = (
+                        position['avgcost'] * position['shares'] + trans) / (shares + position['shares'])
+                    position['avgcost'] = newAvgCost
+                    position['shares'] += shares
+                else:
+                    self.portfolio[stock['symbol']] = {
+                        'shares': shares, 'avgcost': stock['ask']}
+                self.cash -= trans
+            except Exception as e:
+                print("Error buying, ", e)
+                raise
+        self.history['operations'].append((createTimeStamp(),shares,stock['symbol'], stock['bid'], self.cash))
 
     # sell 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
     def sell(self, stock: dict, shares):
@@ -101,25 +118,26 @@ class Bot:
         sellshares = min([self.portfolio[pick]['shares'], int(shares)])
         if sellshares <= 0 or stock['bid'] <= 0.1:
             return
-        self.cash += stock['bid'] * shares
-        if self.portfolio[pick]['shares'] == sellshares:
-            self.portfolio.pop(pick)
-        else:
-            self.portfolio[pick]['shares'] -= shares
-        if self.log:
-            print("Selled", shares, 'shares of ',
-                  stock['symbol'], 'at', stock['bid'], 'Cash: ', self.cash)
+
+        try:
+            self.cash += stock['bid'] * shares
+            if self.portfolio[pick]['shares'] == sellshares:
+                self.portfolio.pop(pick)
+            else:
+                self.portfolio[pick]['shares'] -= shares
+            self.history['operations'].append((createTimeStamp(),-shares,stock['symbol'], stock['bid'], self.cash))
+        except Exception as e:
+            print("Error selling, ", e)
+            raise
 
     # Function to evaluate all current positions by 'bid' price.
     # TODO: Give an analysis (maybe graphical?) on the portfolio.
-    def evaluatePortfolio(self, show=True):
+    def evaluatePortfolio(self, way):
         value = self.cash
         for key in self.portfolio:
             item = self.portfolio[key]
-            stock = getInfo(key,way='fs')
+            stock = getInfo(key,way=way)
             value += stock['bid'] * item['shares']
-        if(show):
-            print("Portfolio value:", value)
         return value
 
     # buyEvaluate computes how many shares of a stock should you buy (If negative then don't buy of course).
@@ -142,24 +160,23 @@ class Bot:
             return 0
 
     # Maintain checks the current portfolio and sells stocks you currently hold.
-    def maintain(self, way='fs'):
+    def maintain(self, way):
+        if len(self.portfolio.keys()) == 0:
+            return
         for i in range(100):
-            if len(self.portfolio.keys()) == 0:
-                sleep(1)
-            else:
-                stock = getInfo(choice(list(self.portfolio.keys())),way='fs')
-                self.sell(stock, self.sellEvaluate(
-                    stock)*10)
+            stock = getInfo(choice(list(self.portfolio.keys())),way=way)
+            self.sell(stock, self.sellEvaluate(
+                stock)*10)
 
     # Explore goes out and evaluate random stocks to buy.
-    def explore(self,way='fs'):
+    def explore(self,way):
         for i in range(100):
             stock = getInfo(choice(SP500),way=way)
             self.buy(stock, self.buyEvaluate(stock)
                      * 10)
 
     # Sell all current positions.
-    def sellAll(self,way='fs'):
+    def sellAll(self,way):
         while(len(self.portfolio) != 0):
             key = choice(list(self.portfolio.keys()))
             stock = getInfo(key, way=way)
@@ -171,12 +188,22 @@ class Bot:
     def operate(self, way='fs'):
         self.explore(way=way)
         self.maintain(way=way)
-        print("Tradebot", self.id, self.name,
-              "has finished operating. Today's evaluation: ", self.evaluatePortfolio(False))
-        self.save()
+        value = self.evaluatePortfolio(way=way)
+        self.history['evaluation'].append((createTimeStamp(),value))
+        if value < 50000:
+            print("Tradebot", self.id, self.name,
+                "ended up losing 50 percent value on its trading strategy and is therefore eliminiated.")
+            self.delete()
+        else:
+            # print("Tradebot", self.id, self.name,
+            #   "survived another day. Today's evaluation: ",value)
+            
 
-downloadData(8,way='db')
+            sys.stdout.write("\rTradebot {0} {1}{2} has survived another day. Today's evaluation: {3}{2}".format(
+                self.id, self.name, (40-len(self.name))*' ',int(value)
+            ))
+            sys.stdout.flush()
+            self.save()
 
-for epoch in bots.find():
-    bot = Bot(epoch)
-    bot.operate(way='db')
+    def log(self):
+        print(self.history['operations'])

@@ -4,5 +4,8 @@ import pymongo
 database = pymongo.MongoClient(
     "mongodb://localhost:27017/")["Dowwin"]
 
-market = database['market']
-bots = database['tradebots']
+db_market = database['market']
+db_bots = database['tradebots']
+
+
+forestSize = 2000

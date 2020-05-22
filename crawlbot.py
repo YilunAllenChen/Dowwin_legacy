@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from json import dumps
 from time import sleep
-from config import market
+from config import db_market
 from SymbList import SP500
 lock = threading.Lock()
 
@@ -56,7 +56,7 @@ def threaded_download_single(thread_id, way='fs'):
     this = threading.current_thread()
     this.alive = True
     while(True):
-        sleep(0.5)
+        sleep(1.5)
         symb = get_next_symb()
         if symb is None or not this.alive:
             break
@@ -74,7 +74,7 @@ def threaded_download_single(thread_id, way='fs'):
                     f.write(dumps(data))
                     f.close()
                 elif way == 'db':
-                    market.replace_one({'Symb': data['Symb']}, data, True)
+                    db_market.replace_one({'Symb': data['Symb']}, data, True)
             except Exception as e:
                 print('Failed to fetch data for',symb,': ',e)
             global count
