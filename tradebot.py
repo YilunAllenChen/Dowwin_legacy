@@ -59,7 +59,7 @@ class Bot:
         if self.cash < 0:
             raise Exception("Self-check::CashIsNegative")
 
-    # Save the current bot to mongoDB.
+    # Save(overwrite) the current bot to mongoDB.
     def save(self):
         try:
             doc = {

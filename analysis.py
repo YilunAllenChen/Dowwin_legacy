@@ -21,7 +21,6 @@ def countBuysAndSells(query={}):
             else:
                 sell += 1
     return buy, sell
-# print(countBuysAndSells())
 
 # Function returns a list of bots with evaluation above bar.
 
