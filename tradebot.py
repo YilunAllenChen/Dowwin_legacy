@@ -25,8 +25,9 @@ def createTimeStamp(): return int(round(time() * 1000))
 def createName(): return choice(names)
 # getInfo macro returns the stock data used in buy, sell and evaluate.
 
+
 class Bot:
-    
+
     # Init function: If given epoch data then use that data. Else generate randomly.
     def __init__(self, epoch={
         'cash': 100000,
@@ -49,9 +50,9 @@ class Bot:
                 'operations': []
             }
         except Exception as e:
-            print("Failed to initialize metadata: ",e)
+            print("Failed to initialize metadata: ", e)
             raise
-        
+
     # Perform a self check on data validity.
     # TODO: perform more checks other than cash.
     def selfcheck(self):
@@ -67,13 +68,14 @@ class Bot:
                 'portfolio': self.portfolio,
                 'chars': self.chars,
                 'name': self.name,
-                'history':self.history
+                'history': self.history
             }
             self.db_bots.replace_one({'id': doc['id']}, doc, True)
         except Exception as e:
             print("Failed to save: ", e)
             raise
     # delete the current bot to mongoDB.
+
     def delete(self):
         try:
             self.db_bots.delete_one({'id': self.id})
@@ -81,9 +83,9 @@ class Bot:
             print("Failed to delete: ", e)
             raise
 
-
     # buy 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
     # TODO: for each position in the portfolio, add additional useful information other than avgCost. For example, buy/sell history.
+
     def buy(self, stock: dict, shares):
         shares = int(shares)
         if shares <= 0 or stock['ask'] <= 0.1:
@@ -108,7 +110,8 @@ class Bot:
             except Exception as e:
                 print("Error buying, ", e)
                 raise
-        self.history['operations'].append((createTimeStamp(),shares,stock['symbol'], stock['bid'], self.cash))
+        self.history['operations'].append(
+            (createTimeStamp(), shares, stock['symbol'], stock['bid'], self.cash))
 
     # sell 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
     def sell(self, stock: dict, shares):
@@ -125,7 +128,8 @@ class Bot:
                 self.portfolio.pop(pick)
             else:
                 self.portfolio[pick]['shares'] -= shares
-            self.history['operations'].append((createTimeStamp(),-shares,stock['symbol'], stock['bid'], self.cash))
+            self.history['operations'].append(
+                (createTimeStamp(), -shares, stock['symbol'], stock['bid'], self.cash))
         except Exception as e:
             print("Error selling, ", e)
             raise
@@ -136,7 +140,7 @@ class Bot:
         value = self.cash
         for key in self.portfolio:
             item = self.portfolio[key]
-            stock = getInfo(key,way=way)
+            stock = getInfo(key, way=way)
             value += stock['bid'] * item['shares']
         return value
 
@@ -164,19 +168,19 @@ class Bot:
         if len(self.portfolio.keys()) == 0:
             return
         for i in range(100):
-            stock = getInfo(choice(list(self.portfolio.keys())),way=way)
+            stock = getInfo(choice(list(self.portfolio.keys())), way=way)
             self.sell(stock, self.sellEvaluate(
                 stock)*10)
 
     # Explore goes out and evaluate random stocks to buy.
-    def explore(self,way):
+    def explore(self, way):
         for i in range(100):
-            stock = getInfo(choice(SP500),way=way)
+            stock = getInfo(choice(SP500), way=way)
             self.buy(stock, self.buyEvaluate(stock)
                      * 10)
 
     # Sell all current positions.
-    def sellAll(self,way):
+    def sellAll(self, way):
         while(len(self.portfolio) != 0):
             key = choice(list(self.portfolio.keys()))
             stock = getInfo(key, way=way)
@@ -189,21 +193,39 @@ class Bot:
         self.explore(way=way)
         self.maintain(way=way)
         value = self.evaluatePortfolio(way=way)
-        self.history['evaluation'].append((createTimeStamp(),value))
-        if value < 50000:
-            print("Tradebot", self.id, self.name,
-                "ended up losing 50 percent value on its trading strategy and is therefore eliminiated.")
+        self.history['evaluation'].append((createTimeStamp(), value))
+
+        recents, recents_str = self.history['operations'][-5:], ''
+        for each in recents:
+            if each[1] < 0:
+                recents_str += '\n' + "\033[91m Selled \033[00m" + str(-int(each[1])) + ' shares of ' + each[2]
+            else:
+                recents_str += '\n' + "\033[92m Buyed  \033[00m" + str(int(each[1])) + ' shares of ' + each[2]
+        recents_str += '\r'
+
+        if value < 80000:
+            print("Bot", self.id, self.name,
+                  "ended up losing 20 percent value on its trading strategy and is therefore eliminiated.")
             self.delete()
         else:
-            # print("Tradebot", self.id, self.name,
-            #   "survived another day. Today's evaluation: ",value)
-            
-
-            sys.stdout.write("\rTradebot {0} {1}{2} has survived another day. Today's evaluation: {3}{2}".format(
-                self.id, self.name, (40-len(self.name))*' ',int(value)
+            for i in range(len(recents)+2):
+                sys.stdout.write("\x1b[1A\x1b[2K")
+            print("Tradebot {0} {1}{2} has survived another day with evaluation: {3}".format(
+                self.id%100000, self.name, (30-len(self.name))*' ', int(value)
             ))
-            sys.stdout.flush()
+            print(recents_str)
+
             self.save()
 
-    def log(self):
-        print(self.history['operations'])
+    def eliminate(self, way='fs', bar=100000):
+        value = self.evaluatePortfolio(way=way)
+        
+        if value < bar:
+            print("Bot", self.id, self.name,
+                  "ended up losing too much value on its trading strategy and is therefore eliminiated.")
+            self.delete()
+        else:
+            print("Tradebot {0} {1}{2} has survived another day with evaluation: {3}".format(
+                self.id%100000, self.name, (30-len(self.name))*' ', int(value)
+            ))
+            sys.stdout.write("\x1b[1A\x1b[2K")
