@@ -1,3 +1,8 @@
+'''
+This module provides numerous common APIs to access data in the database.
+'''
+
+
 from config import db_market
 from json import load
 

@@ -136,6 +136,7 @@ class Bot:
 
     # Function to evaluate all current positions by 'bid' price.
     # TODO: Give an analysis (maybe graphical?) on the portfolio.
+    # TODO: Sometimes when stocks don't have a price it will show up as 0. Fix this.
     def evaluatePortfolio(self, way):
         value = self.cash
         for key in self.portfolio:
@@ -217,6 +218,7 @@ class Bot:
 
             self.save()
 
+    # Determine whether this bot should be eliminated or not.
     def eliminate(self, way='fs', bar=100000):
         value = self.evaluatePortfolio(way=way)
         

@@ -1,6 +1,13 @@
+'''
+This module acquires bots data from the database and perform numerous analysis.
+'''
+
+
 from config import db_bots, db_market
 import sys
 from datetime import datetime
+
+
 
 
 # Function counts buys and sells in

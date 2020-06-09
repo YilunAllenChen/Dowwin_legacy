@@ -1,3 +1,8 @@
+'''
+Working multi-threaded crawlbot that downloads data from yfinance interface.
+'''
+
+
 
 import yfinance as yf
 import threading
@@ -12,23 +17,6 @@ lock = threading.Lock()
 
 total = len(SP500)
 count = 0
-
-
-def processReco(ticker:yf.Ticker):
-    rec = {}
-    data = ticker.get_recommendations()
-    try:
-        for item in data.T.iteritems():
-            ts = item[0].value # Timestamp
-            fm = item[1].get('Firm')
-            fg = item[1].get('From Grade')
-            tg = item[1].get('To Grade')
-            ac = item[1].get('Action')
-            rec[ts]=(fm,fg,tg,ac)
-    except Exception as e:
-        rec['error'] = e
-    return rec
-
 
 def processHist(ticker:yf.Ticker):
     hist = {}
