@@ -7,7 +7,9 @@ from config import db_market
 from json import load
 
 # Parameter way can be 'fs' or 'db' at this moment, pointing to JSON-formatted local data(slow) or mongoDB(fast).
+# Currently fs is deprecated.
 def getInfo(symb, way='fs'):
+    
     try:
         if way == 'db':
             data = db_market.find_one({'Symb': symb})
