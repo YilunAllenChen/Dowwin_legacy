@@ -1,8 +1,10 @@
 import pymongo
 from time import time as now
+HOST = "mongodb://localhost:27017/"
 
 ONEDAY = 86400
-HOST = "mongodb://localhost:27017/"
+
+
 class db():
 
     def __init__(self, host=HOST, database='Dowwin'):

@@ -1,5 +1,7 @@
 lxml
 yfinance
-matplotlib
 numpy
 pandas
+pymongo
+html5lib
+bs4
