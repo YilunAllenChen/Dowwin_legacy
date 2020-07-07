@@ -1,9 +1,15 @@
 import pymongo
 from time import time as now
+from os import system
+from log import log
 HOST = "mongodb://localhost:27017/"
 
-ONEDAY = 86400
-
+try:
+    system('sudo bash setup_mongodb.sh')
+    log("Database connection established",'ok')
+except Exception as e:
+    log("Unable to connect to mongodb docker. Exiting.",'error')
+    exit()
 
 class db():
 
@@ -14,6 +20,14 @@ class db():
         if doc is None or by is None:
             raise RuntimeError("Neither 'doc' nor 'by' can be None")
         self.coll.replace_one({by:doc[by]},doc, True)
+    
+    def count(self):
+        return self.coll.find().count()
+
+    def delete(self,key,val):
+        if key is None:
+            raise RuntimeError("Key can't be None.")
+        self.coll.delete_one({key:val})
 
 class Market_Adapter(db):
     def __init__(self, host=HOST, database='Dowwin'):
@@ -34,34 +48,10 @@ class Bots_Adapter(db):
         super().__init__(host=host, database=database)
         self.coll = self.db['tradebots']
 
-    def get(self, num=1, time=ONEDAY):
-        # Only get robots that haven't been updated for a day.
-        time_bar = now() - time
-        print(time_bar)
-
-        # Query looks for bots with lastUpdate timestamp before the bar or doesn't have the field (probably due to inactivity/deprecation)
-        query = {
-            '$or':[{
-                'lastUpdate':{
-                    '$lt': time_bar 
-                }
-            },{
-                'lastUpdate':{
-                    '$exists': False
-                }
-            }]
-        }
-        found = self.coll.find(query).limit(num)
-        
-        # Query used to update the timestamp for all bots found immediately to prevent other trainers do conflict trainings.
-        # updated_timestamp = {
-        #     '$set':{
-        #         'lastUpdate': now()
-        #     }
-        # }
-        # self.coll.update_many(query,updated_timestamp)
-
+    def get(self, num=100):
+        # Returns the bots that haven't been updated for longest.
+        found = self.coll.find().sort('nextUpdate').limit(num)
         return [item for item in found]
 
-
-
+db_market = Market_Adapter()
+db_bots = Bots_Adapter()

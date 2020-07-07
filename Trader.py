@@ -1,18 +1,22 @@
 from names import names
 from random import choice, random
 from time import time as now
-from database_adapter import Market_Adapter
+from datetime import datetime, timedelta
+from database_adapter import db_bots, db_market
 from math import log10
-from static_data import SP500
+from static_data import stock_symbols
+from global_config import ELIMINATION_THRESHOLD, STARTING_FUND
 
 
-class Trainer():
+from log import *
+
+
+class Tradebot():
     def __init__(self, **kwargs):
-        self.market = Market_Adapter()
         self.data = kwargs.get("data", {
             'id': now()*1000,
             'name': choice(names),
-            'cash': 100000,
+            'cash': STARTING_FUND,
             'portfolio': {},
             'activities': [],
             'evaluations': [],
@@ -21,27 +25,32 @@ class Trainer():
                 'value': random(),
                 'profitmargin': random(),
                 'stoplossmargin': random(),
-                'activeness': int(random()*100)
+                'activeness': int(random()*100),
+                'operatinginterval': 2*int(random()*72) # in hours
             },
-            'lastUpdate': now() * 1000
+            'lastUpdate': datetime.now(),
+            'nextUpdate': datetime.now() + timedelta(hours=self.data['chars']['operatinginterval'])
         })
 
     def selfcheck(self):
-        return
+        return True
+
+    def save(self):
+        db_bots.update(self.data,by='id')
 
     def buy(self, symb, shares):
         shares = int(shares)
         if shares <= 0:
             #print("Cannot buy less than or equal to 0 share")
             return
-        stock = self.market.get(symb)
+        stock = db_market.get(symb)
         if stock is None:
-            raise Exception("Can't obtain target stock")
+            log_with_file("Problem obtaining stock [{}]".format(symb),'error')
         if stock['ask'] <= 0.1:
-            raise Exception("Stock ask is below 0.1.")
+            return
+
         trans = shares * stock['ask']
         if self.data['cash'] < trans:
-            #print("Insufficient Cash")
             return
         try:
             pick = stock['symbol']
@@ -59,20 +68,20 @@ class Trainer():
             print("Error buying, ", e)
             raise
         self.data['activities'].append(
-            (now()*1000, shares, symb, stock['ask'], self.data['cash']))
+            (datetime.now(), shares, symb, stock['ask'], self.data['cash']))
 
     # sell 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
     def sell(self, symb, shares):
-        stock = self.market.get(symb)
+        shares = int(shares)
+        stock = db_market.get(symb)
         pick = symb
         if pick not in self.data['portfolio']:
-            raise Exception("Can't sell stock that you don't have")
+            return
         sellshares = min([self.data['portfolio'][pick]['shares'], int(shares)])
         if sellshares <= 0:
-            #print("Can't sell any more shares of", symb)
             return
         if stock['bid'] <= 0.1:
-            raise Exception("Something's wrong with market data")
+            return
 
         try:
             self.data['cash'] += stock['bid'] * shares
@@ -81,24 +90,25 @@ class Trainer():
             else:
                 self.data['portfolio'][pick]['shares'] -= shares
             self.data['activities'].append(
-                (now()*1000, -shares, symb, stock['bid'], self.data['cash']))
+                (datetime.now(), -shares, symb, stock['bid'], self.data['cash']))
         except Exception as e:
-            raise e
+            log("Error occured selling stock {}. Details: {}".format(symb, e))
 
     def evaluatePortfolio(self):
         evalutaion = self.data['cash']
         positions = self.data['portfolio'].items()
         for position in positions:
-            price = self.market.get(position[0])['bid']
+            price = db_market.get(position[0])['bid']
             if price < 0.1:
-                raise Exception("Invalid Price")
-            evalutaion += price * position[1]['shares']
+                continue
+            else:
+                evalutaion += price * position[1]['shares']
         return evalutaion
 
     # buyEvaluate computes how many shares of a stock should you buy (If negative then don't buy of course).
     # TODO: Develop a better evaluation algorithm.
     def buyEvaluate(self, symb):
-        stock = self.market.get(symb)
+        stock = db_market.get(symb)
         try:
             value = log10(stock['marketCap']) / stock['trailingPE']
             growth = 10 * stock['52WeekChange'] * \
@@ -110,27 +120,45 @@ class Trainer():
     # sellEvaluate computes how many shares of a stock should you sell (If negative then don't sell of course).
     # TODO: Develop a better evaluation algorithm.
     def sellEvaluate(self, symb):
-        stock = self.market.get(symb)
+        stock = db_market.get(symb)
         try:
             return (stock['bid'] - self.data['portfolio'][symb]['avgcost']) * self.data['chars']['profitmargin']/stock['bid'] * self.data['portfolio'][symb]['shares']
         except:
             return 0
 
     # Maintain checks the current portfolio and sells stocks you currently hold.
-    def operate(self):
-        
-        # Explore and buy new positions
-        for i in range(self.data['chars']['activeness']):
-            symb = choice(SP500)
-            self.buy(symb, self.buyEvaluate(symb)* 10)
+    def operate(self, autosave=False):
+        try:
+            
+            # If not yet reached proper update time, simply return.
+            interval = timedelta(hours=self.data['chars']['operatinginterval'])
+            self.data['nextUpdate'] = self.data['lastUpdate'] + interval
+            if self.data['lastUpdate'] is not None and (datetime.now() < self.data['nextUpdate']):
+                return
 
- 
-        # Maintain current portfolio and sell positions
-        for i in range(self.data['chars']['activeness']):
-            symb = choice(list(self.data['portfolio'].keys()))
-            self.sell(symb, self.sellEvaluate(symb)*10)
-        
-        newEvaluation = self.evaluatePortfolio()
-        self.data['evaluations'].append((now(),newEvaluation))
-        self.data['lastUpdate'] = now()
-        return self.data
+            # Explore and buy new positions
+            for _ in range(self.data['chars']['activeness']):
+                symb = choice(stock_symbols)
+                self.buy(symb, self.buyEvaluate(symb)* 10)
+    
+            # Maintain current portfolio and sell positions
+            current_positions = list(self.data['portfolio'].keys())
+            if len(current_positions) > 0:   
+                for _ in range(self.data['chars']['activeness']):
+                    symb = choice(current_positions)
+                    self.sell(symb, self.sellEvaluate(symb)*10)
+            
+            newEvaluation = self.evaluatePortfolio()
+
+            # If below threshold, kill itself. 
+            if newEvaluation < ELIMINATION_THRESHOLD:
+                db_bots.delete('id',self.data['id'])
+                return
+
+
+            self.data['evaluations'].append((now(),newEvaluation))
+            self.data['lastUpdate'] = datetime.now()
+            if autosave:
+                self.save()
+        except Exception as e:
+            log_with_file('Error occurred during operation: {}'.format(e),'error')
