@@ -1,3 +1,5 @@
+#!bin/bash
+
 name='mongodb'
 mongo_volume="$HOME/docker/volumes/mongodb"
 mongo="mongo:4.2.2"
@@ -17,7 +19,7 @@ fi
 
 
 # Make sure our mount path isn't already in use.
-if [! -d $mongo_volume ] ; then
+if [ ! -d $mongo_volume ] ; then
     sudo mkdir -p $mongo_volume
 fi
 
