@@ -4,7 +4,7 @@ name='mongodb'
 mongo_volume="$HOME/docker/volumes/mongodb"
 mongo="mongo:4.2.2"
 
-
+{
 # Make sure an existing docker isn't running.
 if sudo docker ps -f name=$name | grep -q $name ; then
     echo "Mongodb is already running."
@@ -22,7 +22,10 @@ fi
 if [ ! -d $mongo_volume ] ; then
     sudo mkdir -p $mongo_volume
 fi
-
+} || {
+    echo "Failed to mount docker. Exiting..."
+    exit 1
+}
 
 
 {
