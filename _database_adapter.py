@@ -1,21 +1,19 @@
 import pymongo
 from time import time as now
 from os import system
-from log import log
-HOST = "mongodb://localhost:27017/"
+from __log import log
+from _global_config import DB_HOST
 
-try:
-    system('sudo bash setup_mongodb.sh')
-    log("Database connection established",'ok')
-except Exception as e:
-    log("Unable to connect to mongodb docker. Exiting.",'error')
-    exit()
+
+client = pymongo.MongoClient(host=DB_HOST)
 
 class db():
 
-    def __init__(self, host=HOST, database='Dowwin'):
-        self.db = pymongo.MongoClient(host)[database]
+    def __init__(self, database='Dowwin'):
+        self.db = client[database]
         self.coll = None
+        self.test_connection()
+
     def update(self,doc,by):
         if doc is None or by is None:
             raise RuntimeError("Neither 'doc' nor 'by' can be None")
@@ -28,10 +26,18 @@ class db():
         if key is None:
             raise RuntimeError("Key can't be None.")
         self.coll.delete_one({key:val})
+    
+    def test_connection(self):
+        try:
+            self.db['test'].insert_one({"test":'test'})
+            self.db.drop_collection('test')
+        except:
+            log("Unable to connect to database",'error')
+            raise
 
 class Market_Adapter(db):
-    def __init__(self, host=HOST, database='Dowwin'):
-        super().__init__(host=host, database=database)
+    def __init__(self, database='Dowwin'):
+        super().__init__(database=database)
         self.coll = self.db['market']
 
     def get(self, symb):
@@ -44,8 +50,8 @@ class Market_Adapter(db):
 
 
 class Bots_Adapter(db):
-    def __init__(self, host=HOST, database='Dowwin'):
-        super().__init__(host=host, database=database)
+    def __init__(self, database='Dowwin'):
+        super().__init__(database=database)
         self.coll = self.db['tradebots']
 
     def get(self, num=100):

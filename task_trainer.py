@@ -1,11 +1,11 @@
-from Trader import Tradebot
-from database_adapter import db_bots
-from log import *
+from _Trader import Tradebot
+from _database_adapter import db_bots
+from __log import log
 from time import sleep
 import asyncio
 
 
-async def Trainer(loop, stop): 
+async def task_trainer(loop, stop): 
     log('*** Trainer Starting ***','ok')
     while not stop.is_set():
         vals = []

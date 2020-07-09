@@ -1,8 +1,8 @@
-from log import *
+from __log import log
 
 
-async def CLI(loop, stop):
-    log("Press 'q' to shutdown the HVT Request Bot and quit the application: ")
+async def task_CLI(loop, stop):
+    log("***** Command Line Utilities Online. Click q to quit. ***** ")
     while not stop.is_set():
         command = await loop.run_in_executor(None, input, "")
         if 'q' in command:

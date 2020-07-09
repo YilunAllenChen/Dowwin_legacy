@@ -1,11 +1,11 @@
-from database_adapter import db_bots
-from Trader import Tradebot
-from log import *
-from global_config import BOT_THRESHOLD
+from __log import log
+from _database_adapter import db_bots
+from _Trader import Tradebot
+from _global_config import BOT_THRESHOLD
 from time import sleep
 import asyncio
 
-async def Arbiter(loop, stop):
+async def task_arbiter(loop, stop):
     log('*** Arbiter Starting ***','ok')
     while not stop.is_set():
         # Add new bots until cap

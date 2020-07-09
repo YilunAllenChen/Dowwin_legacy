@@ -1,14 +1,13 @@
-from names import names
+from math import log10
 from random import choice, random
 from time import time as now
 from datetime import datetime, timedelta
-from database_adapter import db_bots, db_market
-from math import log10
-from static_data import stock_symbols
-from global_config import ELIMINATION_THRESHOLD, STARTING_FUND
+from _names import names
+from _database_adapter import db_bots, db_market
+from _static_data import stock_symbols
+from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
 
-
-from log import *
+from __log import log
 
 
 class Tradebot():
@@ -45,7 +44,7 @@ class Tradebot():
             return
         stock = db_market.get(symb)
         if stock is None:
-            log_with_file("Problem obtaining stock [{}]".format(symb),'error')
+            log("Problem obtaining stock [{}]".format(symb),'error')
         if stock['ask'] <= 0.1:
             return
 
@@ -161,4 +160,4 @@ class Tradebot():
             if autosave:
                 self.save()
         except Exception as e:
-            log_with_file('Error occurred during operation: {}'.format(e),'error')
+            log('Error occurred during operation: {}'.format(e),'error')
