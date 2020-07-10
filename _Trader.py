@@ -28,7 +28,6 @@ class Tradebot():
                 'operatinginterval': 2*int(random()*72) # in hours
             },
             'lastUpdate': datetime.now(),
-            'nextUpdate': datetime.now() + timedelta(hours=self.data['chars']['operatinginterval'])
         })
 
     def selfcheck(self):

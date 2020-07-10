@@ -7,3 +7,7 @@
     - Change line 286 to: 
         - self._institutional_holders = holders[0]
     - This allows the crawler to acquire info of stock even if there isn't any institutional holders.
+
+
+more resources can be found on the coda page:
+## [Here](https://coda.io/d/Project-Dowwin_dbDctQyYmc8/Project-Planning_surrt#Feature-List_tuBFU/r1)
