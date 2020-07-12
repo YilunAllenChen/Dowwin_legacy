@@ -1,3 +1,0 @@
-[2020-07-09 08:05:20.612531] Data acquired for MMM
-[2020-07-09 08:05:23.313605] Data acquired for ABT
-[2020-07-09 08:05:25.899921] Error occured when parsing ABBV,HTTP Error 503: Service Unavailable

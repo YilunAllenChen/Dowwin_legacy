@@ -1,7 +1,4 @@
 lxml
-yfinance
-numpy
-pandas
 pymongo
 html5lib
 bs4

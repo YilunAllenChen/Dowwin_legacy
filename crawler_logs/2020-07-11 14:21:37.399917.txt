@@ -1,0 +1,2 @@
+[2020-07-11 14:21:37.405898] Error occured when parsing MMM,__init__() should return None, not 'coroutine'
+[2020-07-11 14:21:38.907470] Error occured when parsing ABT,__init__() should return None, not 'coroutine'

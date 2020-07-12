@@ -6,6 +6,7 @@ from _names import names
 from _database_adapter import db_bots, db_market
 from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
+import asyncio
 
 from __log import log
 
@@ -16,6 +17,7 @@ class Tradebot():
             'id': now()*1000,
             'name': choice(names),
             'cash': STARTING_FUND,
+            'value': STARTING_FUND,
             'portfolio': {},
             'activities': [],
             'evaluations': [],
@@ -29,6 +31,9 @@ class Tradebot():
             },
             'lastUpdate': datetime.now(),
         })
+        if self.data.get('nextUpdate') is None:
+            interval = timedelta(hours=self.data['chars']['operatinginterval'])
+            self.data['nextUpdate'] = self.data['lastUpdate'] + interval
 
     def selfcheck(self):
         return True
@@ -155,6 +160,7 @@ class Tradebot():
 
 
             self.data['evaluations'].append((now(),newEvaluation))
+            self.data['value'] = newEvaluation
             self.data['lastUpdate'] = datetime.now()
             if autosave:
                 self.save()
