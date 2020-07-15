@@ -14,8 +14,8 @@ async def Manager():
     tasks = [
         asyncio.ensure_future(task_CLI(loop, stop, debug=False)),
         asyncio.ensure_future(task_crawler(loop, stop, debug=False)),
-        # asyncio.ensure_future(task_arbiter(loop, stop, debug=False)),
-        # asyncio.ensure_future(task_trainer(loop, stop, debug=False))
+        asyncio.ensure_future(task_arbiter(loop, stop, debug=False)),
+        asyncio.ensure_future(task_trainer(loop, stop, debug=False))
     ]
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)
