@@ -1,3 +1,0 @@
-[2020-07-11 14:13:58.865111] Data acquired for MMM
-[2020-07-11 14:14:00.410972] Data acquired for ABT
-[2020-07-11 14:14:01.957709] Data acquired for ABBV
