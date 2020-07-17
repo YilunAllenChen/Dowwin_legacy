@@ -9,7 +9,7 @@ from _database_adapter import db_market
 from __log import log
 
 
-txt_log = open('crawler_logs/{}.txt'.format(str(dt.now())), 'w+')
+txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 
 
 async def task_crawler(loop, stop, debug=False):
