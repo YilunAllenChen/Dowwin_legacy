@@ -134,10 +134,11 @@ class Tradebot():
         try:
             
             # If not yet reached proper update time, simply return.
+            if self.data['nextUpdate'] is not None and (datetime.now() < self.data['nextUpdate']):
+                return
+            
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
             self.data['nextUpdate'] = self.data['lastUpdate'] + interval
-            if self.data['lastUpdate'] is not None and (datetime.now() < self.data['nextUpdate']):
-                return
 
             # Explore and buy new positions
             for _ in range(self.data['chars']['activeness']):

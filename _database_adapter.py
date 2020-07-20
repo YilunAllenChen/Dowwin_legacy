@@ -63,6 +63,12 @@ class Bots_Adapter(db):
     def filteredGet(self, query):
         found = self.coll.find(query)
         return [item for item in found]
+    
+    def update(self, doc, by):
+        if doc is None or by is None:
+            raise RuntimeError("Neither 'doc' nor 'by' can be None")
+        self.coll.replace_one({by: doc[by]}, doc, True)
+        new = self.coll.find_one({by: doc[by]})
 
     def get(self, num=100):
         # Returns the bots that haven't been updated for longest.

@@ -1,5 +1,7 @@
+#!/usr/bin/python3
+
 import asyncio
-from __log import log
+from __log import log, DEBUG
 from _database_adapter import client
 from task_cli import task_CLI
 from task_crawler import task_crawler
@@ -12,10 +14,10 @@ async def Manager():
     stop = asyncio.Event()
 
     tasks = [
-        asyncio.ensure_future(task_CLI(loop, stop, debug=False)),
-        asyncio.ensure_future(task_crawler(loop, stop, debug=False)),
-        asyncio.ensure_future(task_arbiter(loop, stop, debug=False)),
-        asyncio.ensure_future(task_trainer(loop, stop, debug=False))
+        asyncio.ensure_future(task_CLI(loop, stop, debug=DEBUG)),
+        asyncio.ensure_future(task_crawler(loop, stop, debug=DEBUG)),
+        asyncio.ensure_future(task_arbiter(loop, stop, debug=DEBUG)),
+        asyncio.ensure_future(task_trainer(loop, stop, debug=DEBUG))
     ]
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)

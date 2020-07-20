@@ -14,9 +14,5 @@ async def task_trainer(loop, stop, debug=False):
                 break
             bot = Tradebot(data=item)
             bot.operate(autosave=True)
-            vals.append(bot.evaluatePortfolio())
-        if debug:
-            log("Trainer: Finished training with a batch. \nHighest: {}\nLowest: {}\n Mean: {}\nStarting with a new batch.".format(
-                max(vals), min(vals), sum(vals)/len(vals)), 'ok')
         await asyncio.wait({asyncio.sleep(600), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
     log('*** Trainer is shutting down ***', 'ok')
