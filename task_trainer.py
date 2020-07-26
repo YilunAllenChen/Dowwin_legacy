@@ -9,10 +9,10 @@ async def task_trainer(loop, stop, debug=False):
     log('*** Trainer Starting ***', 'ok')
     while not stop.is_set():
         vals = []
-        for item in db_bots.get(20):
+        for item in db_bots.get(1):
             if stop.is_set():
                 break
             bot = Tradebot(data=item)
             bot.operate(autosave=True)
-        await asyncio.wait({asyncio.sleep(600), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
+        await asyncio.wait({asyncio.sleep(1), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
     log('*** Trainer is shutting down ***', 'ok')

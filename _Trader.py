@@ -8,7 +8,7 @@ from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
 import asyncio
 
-from __log import log
+from __log import log, vlog, DEBUG
 
 
 class Tradebot():
@@ -30,15 +30,16 @@ class Tradebot():
                 'operatinginterval': 2*int(random()*72) # in hours
             },
             'lastUpdate': datetime.now(),
+            'nextUpdate': datetime.now(),
         })
-        if self.data.get('nextUpdate') is None:
-            interval = timedelta(hours=self.data['chars']['operatinginterval'])
-            self.data['nextUpdate'] = self.data['lastUpdate'] + interval
 
     def selfcheck(self):
         return True
 
     def save(self):
+        if DEBUG:
+            data = self.data
+            log(f"\nName    : {data['id']} | {data['name']}\nValue   : {data['value']} with {data['cash']} in cash")
         db_bots.update(self.data,by='id')
 
     def buy(self, symb, shares):
@@ -56,7 +57,7 @@ class Tradebot():
         if self.data['cash'] < trans:
             return
         try:
-            pick = stock['symbol']
+            pick = symb
             if pick in self.data['portfolio']:
                 position = self.data['portfolio'][pick]
                 newAvgCost = (
@@ -113,11 +114,13 @@ class Tradebot():
     def buyEvaluate(self, symb):
         stock = db_market.get(symb)
         try:
-            value = log10(stock['marketCap']) / stock['trailingPE']
-            growth = 10 * stock['52WeekChange'] * \
-                stock['beta'] + 10 * stock['earningsQuarterlyGrowth']
+            value = 20 * log10(stock.get('marketCap',0)) / stock.get('trailingPE', 0)
+
+            growth = 0.2 * stock.get('fiftyTwoWeekHigh', 0) / stock.get('fiftyTwoWeekLow') * \
+                3 * stock.get('beta',1)
+
             return self.data['chars']['growth'] * growth + self.data['chars']['value'] * value
-        except:
+        except Exception as e:
             return 0
 
     # sellEvaluate computes how many shares of a stock should you sell (If negative then don't sell of course).
@@ -132,11 +135,12 @@ class Tradebot():
     # Maintain checks the current portfolio and sells stocks you currently hold.
     def operate(self, autosave=False):
         try:
-            
             # If not yet reached proper update time, simply return.
             if self.data['nextUpdate'] is not None and (datetime.now() < self.data['nextUpdate']):
                 return
-            
+
+
+            self.data['lastUpdate'] = datetime.now()
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
             self.data['nextUpdate'] = self.data['lastUpdate'] + interval
 
@@ -162,7 +166,6 @@ class Tradebot():
 
             self.data['evaluations'].append((now(),newEvaluation))
             self.data['value'] = newEvaluation
-            self.data['lastUpdate'] = datetime.now()
             if autosave:
                 self.save()
         except Exception as e:

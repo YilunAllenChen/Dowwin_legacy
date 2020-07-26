@@ -1,13 +1,6 @@
 from _database_adapter import db_bots, db_market
-from __log import log
-
-
-# A customized logging function, expands dictionary vertically. Feel free to add more customized functions yourselves.
-def vlog(data: dict):
-    content = '\n'
-    for key in data.keys():
-        content += f'{key} : {data[key]}\n'
-    log(content)
+from __log import log, vlog
+import matplotlib.pyplot as plot
 
 # Test connection to db.
 db_bots.test_connection()
@@ -28,11 +21,13 @@ vlog({'key1': 'value1', 'key2': 'value2'})
 
 # db_bots.get() function gives you a list of tradebots sorted based on nextUpdate timestamp, from earliest to latest
 # Parameter 'num' specifices how many tradebots you are getting.
-some_bots = db_bots.get(num=200)
+some_bots = db_bots.get(num=20000)
 
 # vertically expand the 11th bot
 vlog(some_bots[10])
 
+plot.hist([bot.get('nextUpdate') for bot in some_bots])
+plot.show()
 
 # db_market.get("MSFT") function gives you information about the stock abbrevieated as msft (Microsoft Inc.).
 msft = db_market.get("MSFT")
