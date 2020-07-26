@@ -3,3 +3,5 @@ pymongo
 html5lib
 bs4
 dnspython
+requests
+pandas
