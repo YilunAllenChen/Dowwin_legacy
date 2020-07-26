@@ -7,8 +7,10 @@ from _global_config import DB_HOST
 from _crawler_apis import Ticker
 from _database_adapter import db_market
 from __log import log
+from os import makedirs
 
 
+makedirs('crawler_logs', exist_ok=True)
 txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 
 
