@@ -26,7 +26,7 @@ some_bots = db_bots.get(num=20000)
 # vertically expand the 11th bot
 vlog(some_bots[10])
 
-plot.hist([bot.get('nextUpdate') for bot in some_bots])
+plot.hist([bot.get('cash') for bot in some_bots])
 plot.show()
 
 # db_market.get("MSFT") function gives you information about the stock abbrevieated as msft (Microsoft Inc.).

@@ -1,7 +1,7 @@
 import pymongo
 from time import time as now
 from os import system
-from __log import log
+from __log import log, vlog
 from _global_config import DB_HOST
 
 
@@ -48,6 +48,12 @@ class Market_Adapter(db):
 
     def get(self, symb):
         try:
+            if type(symb) == list:
+                all_data = self.coll.find({'Symb': {'$in': symb}})
+                res = {}
+                for data in all_data:
+                    res[data.get('Symb')] = data.get('Info', {})
+                return res
             data = self.coll.find_one({'Symb': symb})
             return data['Info'] if data is not None else None
         except Exception as e:

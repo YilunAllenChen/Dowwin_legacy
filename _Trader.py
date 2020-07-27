@@ -32,9 +32,16 @@ class Tradebot():
             'lastUpdate': datetime.now(),
             'nextUpdate': datetime.now(),
         })
+        self.cache = {}
 
     def selfcheck(self):
         return True
+
+    def get(self, symb):
+        if symb in self.cache:
+            return self.cache[symb]
+        else:
+            return db_market.get(symb)
 
     def save(self):
         if DEBUG:
@@ -45,9 +52,8 @@ class Tradebot():
     def buy(self, symb, shares):
         shares = int(shares)
         if shares <= 0:
-            #print("Cannot buy less than or equal to 0 share")
             return
-        stock = db_market.get(symb)
+        stock = self.get(symb)
         if stock is None:
             log("Problem obtaining stock [{}]".format(symb),'error')
         if stock['ask'] <= 0.1:
@@ -77,7 +83,7 @@ class Tradebot():
     # sell 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
     def sell(self, symb, shares):
         shares = int(shares)
-        stock = db_market.get(symb)
+        stock = self.get(symb)
         pick = symb
         if pick not in self.data['portfolio']:
             return
@@ -102,9 +108,9 @@ class Tradebot():
         evalutaion = self.data['cash']
         positions = self.data['portfolio'].items()
         for position in positions:
-            price = db_market.get(position[0])['bid']
+            price = self.get(position[0])['bid']
             if price < 0.1:
-                continue
+                price = position[1]['avgcost']
             else:
                 evalutaion += price * position[1]['shares']
         return evalutaion
@@ -112,7 +118,7 @@ class Tradebot():
     # buyEvaluate computes how many shares of a stock should you buy (If negative then don't buy of course).
     # TODO: Develop a better evaluation algorithm.
     def buyEvaluate(self, symb):
-        stock = db_market.get(symb)
+        stock = self.get(symb)
         try:
             value = 20 * log10(stock.get('marketCap',0)) / stock.get('trailingPE', 0)
 
@@ -126,7 +132,7 @@ class Tradebot():
     # sellEvaluate computes how many shares of a stock should you sell (If negative then don't sell of course).
     # TODO: Develop a better evaluation algorithm.
     def sellEvaluate(self, symb):
-        stock = db_market.get(symb)
+        stock = self.get(symb)
         try:
             return (stock['bid'] - self.data['portfolio'][symb]['avgcost']) * self.data['chars']['profitmargin']/stock['bid'] * self.data['portfolio'][symb]['shares']
         except:
@@ -144,13 +150,14 @@ class Tradebot():
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
             self.data['nextUpdate'] = self.data['lastUpdate'] + interval
 
-            # Explore and buy new positions
-            for _ in range(self.data['chars']['activeness']):
-                symb = choice(stock_symbols)
+            eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
+            self.cache.update(db_market.get(eyeing_buys))
+            for symb in eyeing_buys:
                 self.buy(symb, self.buyEvaluate(symb)* 10)
     
             # Maintain current portfolio and sell positions
             current_positions = list(self.data['portfolio'].keys())
+            self.cache.update(db_market.get(current_positions))
             if len(current_positions) > 0:   
                 for _ in range(self.data['chars']['activeness']):
                     symb = choice(current_positions)
@@ -168,5 +175,6 @@ class Tradebot():
             self.data['value'] = newEvaluation
             if autosave:
                 self.save()
+            self.cache = {}
         except Exception as e:
             log('Error occurred during operation: {}'.format(e),'error')
