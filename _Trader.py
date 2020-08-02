@@ -8,7 +8,7 @@ from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
 import asyncio
 
-from __log import log, vlog, DEBUG
+from __log import log, vlog, debug
 
 
 class Tradebot():
@@ -44,9 +44,7 @@ class Tradebot():
             return db_market.get(symb)
 
     def save(self):
-        if DEBUG:
-            data = self.data
-            log(f"\nName    : {data['id']} | {data['name']}\nValue   : {data['value']} with {data['cash']} in cash")
+        debug(self.stringify_bot())
         db_bots.update(self.data,by='id')
 
     def buy(self, symb, shares):
@@ -126,7 +124,7 @@ class Tradebot():
                 3 * stock.get('beta',1)
 
             return self.data['chars']['growth'] * growth + self.data['chars']['value'] * value
-        except Exception as e:
+        except Exception:
             return 0
 
     # sellEvaluate computes how many shares of a stock should you sell (If negative then don't sell of course).
@@ -148,7 +146,8 @@ class Tradebot():
 
             self.data['lastUpdate'] = datetime.now()
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
-            self.data['nextUpdate'] = self.data['lastUpdate'] + interval
+            self.data['nextUpdate'] = self.data['lastUpdate']
+            debug(f'{self.data["id"]} starting to operate')
 
             eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
             self.cache.update(db_market.get(eyeing_buys))
@@ -173,8 +172,31 @@ class Tradebot():
 
             self.data['evaluations'].append((now(),newEvaluation))
             self.data['value'] = newEvaluation
+
+            debug(f'{self.data["id"]} saving')
             if autosave:
                 self.save()
             self.cache = {}
         except Exception as e:
             log('Error occurred during operation: {}'.format(e),'error')
+
+
+    def stringify_recent_activites(self):
+        data = self.data
+        res = ''
+        count = -min([len(data['activities']), 10])
+        for item in data['activities'][count::]:
+            timestamp = str(item[0])
+            action = '\033[92mBUYED\033[0m' if item[1] > 0 else '\033[91mSOLD \033[0m'
+            stock = item[2]
+            shares = abs(item[1])
+            price = item[3]
+            res += f'[{timestamp}] {action} {shares} of {stock} at price {price}\n'
+        return res
+
+    def stringify_bot(self):
+        data = self.data
+        res = (f"Tradebot {data['id']} : {data['name']}. \nValue: {data['value']} | Cash: {data['cash']}\n"
+        f"Recent Activites:\n\n"
+        f"{self.stringify_recent_activites()}")
+        return res

@@ -1,4 +1,4 @@
-from __log import log
+from __log import log, debug
 from _database_adapter import db_bots
 from _Trader import Tradebot
 from _global_config import BOT_THRESHOLD
@@ -6,7 +6,7 @@ from time import sleep
 import asyncio
 
 
-async def task_arbiter(loop, stop, debug=False):
+async def task_arbiter(loop, stop):
     log('*** Arbiter Starting ***', 'ok')
     while not stop.is_set():
         # Add new bots until cap
@@ -15,9 +15,8 @@ async def task_arbiter(loop, stop, debug=False):
             newbot = Tradebot()
             newbot.save()
             added += 1
-        if debug:
-            log('Arbiter: Added {} new trade bots into the forest'.format(added))
+        debug('Arbiter: Added {} new trade bots into the forest'.format(added))
 
-        await asyncio.wait({asyncio.sleep(60), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
+        await asyncio.wait({asyncio.sleep(5), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
     log("*** Arbiter shutting down ***", 'ok')
  

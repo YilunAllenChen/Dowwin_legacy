@@ -38,7 +38,7 @@ stock_symbols = [
     'TSN', 'UDR', 'ULTA', 'USB', 'UAA', 'UA', 'UNP', 'UAL', 'UNH', 'UPS', 'URI', 'UHS', 'UNM', 'VFC', 'VLO', 'VAR', 
     'VTR', 'VRSN', 'VRSK', 'VZ', 'VRTX', 'VIAC', 'V', 'VNO', 'VMC', 'WRB', 'WAB', 'WMT', 'WBA', 'DIS', 'WM', 'WAT', 
     'WEC', 'WFC', 'WELL', 'WDC', 'WU', 'WRK', 'WY', 'WHR', 'WMB', 'WLTW', 'WYNN', 'XEL', 'XRX', 'XLNX', 'XYL', 
-    'YUM', 'ZBRA', 'ZBH', 'ZION', 'ZTS'
+    'YUM', 'ZBRA', 'ZBH', 'ZION', 'ZTS',
     
     
     # NASDAQ 100
@@ -50,7 +50,7 @@ stock_symbols = [
     "LRCX", "LBTYA", "LBTYK", "LULU", "MAR", "MXIM", "MELI", "MCHP", "MU", "MSFT", "MRNA", "MondelēMDLZ", "MNST", 
     "NTAP", "NTES", "NFLX", "NVDA", "NXPI", "O'ORLY", "PCAR", "PAYX", "PYPL", "PEP", "QCOM", "REGN", "ROST", "SGEN", 
     "SIRI", "SWKS", "SPLK", "SBUX", "SNPS", "T-TMUS", "Take-TTWO", "TSLA", "TXN", "TCOM", "ULTA", "VRSN", "VRSK", 
-    "VRTX", "WBA", "WDAY", "WDC", "XEL", "XLNX", "ZM"
+    "VRTX", "WBA", "WDAY", "WDC", "XEL", "XLNX", "ZM",
     
     
     # RUSSELL 2000

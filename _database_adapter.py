@@ -3,6 +3,7 @@ from time import time as now
 from os import system
 from __log import log, vlog
 from _global_config import DB_HOST
+from _static_data import stock_symbols
 
 
 client = pymongo.MongoClient(host=DB_HOST)
@@ -74,16 +75,16 @@ class Bots_Adapter(db):
         if doc is None or by is None:
             raise RuntimeError("Neither 'doc' nor 'by' can be None")
         self.coll.replace_one({by: doc[by]}, doc, True)
-        new = self.coll.find_one({by: doc[by]})
-
+    
+    
     def get(self, num=100):
         # Returns the bots that haven't been updated for longest.
         found = self.coll.find().limit(num)
-        return [item for item in found].limit(num)
+        return [item for item in found]
 
     def get_sorted_by_next_update(self, num=100):
-        return self.get(num=num).sort('nextUpdate')
-
+        return self.coll.find().limit(num).sort('nextUpdate')
+    
 
 db_market = Market_Adapter()
 db_bots = Bots_Adapter()
