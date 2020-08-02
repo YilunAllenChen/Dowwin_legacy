@@ -5,3 +5,4 @@ bs4
 dnspython
 requests
 pandas
+matplotlib

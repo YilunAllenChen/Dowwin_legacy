@@ -21,12 +21,12 @@ vlog({'key1': 'value1', 'key2': 'value2'})
 
 # db_bots.get() function gives you a list of tradebots sorted based on nextUpdate timestamp, from earliest to latest
 # Parameter 'num' specifices how many tradebots you are getting.
-some_bots = db_bots.get(num=20000)
+some_bots = db_bots.get(num=2000)
 
 # vertically expand the 11th bot
 vlog(some_bots[10])
 
-plot.hist([bot.get('cash') for bot in some_bots])
+plot.hist([bot.get('value') for bot in some_bots])
 plot.show()
 
 # db_market.get("MSFT") function gives you information about the stock abbrevieated as msft (Microsoft Inc.).
