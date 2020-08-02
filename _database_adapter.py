@@ -78,8 +78,11 @@ class Bots_Adapter(db):
 
     def get(self, num=100):
         # Returns the bots that haven't been updated for longest.
-        found = self.coll.find().sort('nextUpdate').limit(num)
-        return [item for item in found]
+        found = self.coll.find().limit(num)
+        return [item for item in found].limit(num)
+
+    def get_sorted_by_next_update(self, num=100):
+        return self.get(num=num).sort('nextUpdate')
 
 
 db_market = Market_Adapter()

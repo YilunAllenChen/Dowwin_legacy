@@ -9,7 +9,7 @@ async def task_trainer(loop, stop, debug=False):
     log('*** Trainer Starting ***', 'ok')
     while not stop.is_set():
         vals = []
-        for item in db_bots.get(1):
+        for item in db_bots.get_sorted_by_next_update(1):
             if stop.is_set():
                 break
             bot = Tradebot(data=item)
