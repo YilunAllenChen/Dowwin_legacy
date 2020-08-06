@@ -1,3 +1,11 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module provides command line utilities for the system.
+'''
+
 from __log import log
 from _database_adapter import db_bots
 

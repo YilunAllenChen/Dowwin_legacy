@@ -1,3 +1,10 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module defines a task to constantly update the database with the APIs provided by crawler_apis
+'''
 
 import asyncio
 from datetime import datetime as dt

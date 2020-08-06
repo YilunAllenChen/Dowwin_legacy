@@ -1,3 +1,12 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module finds stock symbols that are not in the database and fill them in.
+'''
+
+
 import asyncio
 from datetime import datetime as dt
 from _static_data import stock_symbols

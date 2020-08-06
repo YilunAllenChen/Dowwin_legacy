@@ -1,3 +1,11 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module defines a trainer task to train tradebots.
+'''
+
 from _Trader import Tradebot
 from _database_adapter import db_bots
 from __log import log

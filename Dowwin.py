@@ -1,5 +1,11 @@
 #!/usr/bin/python3
+#
+# Darwin Robotics, 2020
+#
 
+'''
+This is the entry point to the Dowwin Core system.
+'''
 import asyncio
 from __log import log
 from _database_adapter import client

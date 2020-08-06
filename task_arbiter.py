@@ -1,3 +1,12 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module fills the forest's empty slots with randomly generated new tradebots.
+'''
+
+
 from __log import log, debug
 from _database_adapter import db_bots
 from _Trader import Tradebot

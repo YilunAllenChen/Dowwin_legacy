@@ -1,3 +1,12 @@
+#
+# Darwin Robotics, 2020
+#
+
+'''
+This module contains the core functionalities of Tradebot.
+'''
+
+
 from math import log10
 from random import choice, random
 from time import time as now
@@ -181,10 +190,10 @@ class Tradebot():
             log('Error occurred during operation: {}'.format(e),'error')
 
 
-    def stringify_recent_activites(self):
+    def stringify_recent_activites(self, item=10):
         data = self.data
         res = ''
-        count = -min([len(data['activities']), 10])
+        count = -min([len(data['activities']), item])
         for item in data['activities'][count::]:
             timestamp = str(item[0])
             action = '\033[92mBUYED\033[0m' if item[1] > 0 else '\033[91mSOLD \033[0m'
