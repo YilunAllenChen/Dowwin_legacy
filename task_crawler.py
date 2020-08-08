@@ -10,6 +10,7 @@ import asyncio
 from datetime import datetime as dt
 from _crawler_apis import Ticker
 from _adapter_database import db_market
+from _adapter_database_async import get_all_symbols
 from __log import log, debug
 from os import makedirs
 
@@ -21,7 +22,7 @@ txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 async def task_crawler(loop, stop):
     log('*** Crawler Starting ***','ok')
     while not stop.is_set():
-        symbs = db_market.get_symbols_to_update()
+        symbs = await asyncio.create_task(get_all_symbols())
         debug("Done")
         for symb in symbs:
             if stop.is_set():

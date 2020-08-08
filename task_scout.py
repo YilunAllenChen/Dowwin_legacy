@@ -11,6 +11,7 @@ import asyncio
 from datetime import datetime as dt
 from _static_data import stock_symbols
 from _adapter_database import db_market
+from _adapter_database_async import get_all_symbols
 from _crawler_apis import Ticker
 from __log import log, debug
 from os import makedirs
@@ -21,7 +22,7 @@ from os import makedirs
 async def task_scout(loop, stop):
     log('*** Scout Starting ***','ok')
     
-    symbs = db_market.get_symbols_to_update()
+    symbs = await get_all_symbols()
 
     for symb in stock_symbols:
         try:

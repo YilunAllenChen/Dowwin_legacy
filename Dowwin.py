@@ -24,10 +24,10 @@ async def Manager():
     tasks = [
         asyncio.ensure_future(task_CLI(loop, stop)),
         asyncio.create_task(task_cache_manager(stop)),
-        # asyncio.ensure_future(task_crawler(loop, stop)),
-        # asyncio.ensure_future(task_arbiter(loop, stop)),
+        asyncio.ensure_future(task_crawler(loop, stop)),
+        asyncio.ensure_future(task_arbiter(loop, stop)),
         asyncio.ensure_future(task_trainer(loop, stop)),
-        # asyncio.ensure_future(task_scout(loop, stop)),
+        asyncio.ensure_future(task_scout(loop, stop)),
     ]
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)
