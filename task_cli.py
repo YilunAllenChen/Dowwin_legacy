@@ -7,7 +7,8 @@ This module provides command line utilities for the system.
 '''
 
 from __log import log
-from _database_adapter import db_bots
+from _adapter_database import db_bots
+from task_cache_manager import market_cache
 
 
 async def task_CLI(loop, stop):
@@ -22,4 +23,5 @@ async def task_CLI(loop, stop):
 
 
 def report():
-    log("What's up.")
+    log(market_cache)
+

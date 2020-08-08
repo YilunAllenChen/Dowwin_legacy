@@ -12,11 +12,11 @@ from random import choice, random
 from time import time as now
 from datetime import datetime, timedelta
 from _names import names
-from _database_adapter import db_bots, db_market
+from _adapter_database import db_bots, db_market
 from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
+from task_cache_manager import market_cache
 import asyncio
-
 from __log import log, vlog, debug
 
 
@@ -41,14 +41,13 @@ class Tradebot():
             'lastUpdate': datetime.now(),
             'nextUpdate': datetime.now(),
         })
-        self.cache = {}
 
     def selfcheck(self):
         return True
 
     def get(self, symb):
-        if symb in self.cache:
-            return self.cache[symb]
+        if symb in market_cache:
+            return market_cache[symb]
         else:
             return db_market.get(symb)
 
@@ -159,13 +158,11 @@ class Tradebot():
             debug(f'{self.data["id"]} starting to operate')
 
             eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
-            self.cache.update(db_market.get(eyeing_buys))
             for symb in eyeing_buys:
                 self.buy(symb, self.buyEvaluate(symb)* 10)
     
             # Maintain current portfolio and sell positions
             current_positions = list(self.data['portfolio'].keys())
-            self.cache.update(db_market.get(current_positions))
             if len(current_positions) > 0:   
                 for _ in range(self.data['chars']['activeness']):
                     symb = choice(current_positions)
@@ -185,7 +182,6 @@ class Tradebot():
             debug(f'{self.data["id"]} saving')
             if autosave:
                 self.save()
-            self.cache = {}
         except Exception as e:
             log('Error occurred during operation: {}'.format(e),'error')
 

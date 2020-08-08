@@ -71,6 +71,9 @@ class db():
             log("Unable to connect to database", 'error')
             raise ConnectionError("Unable to connect to the database")
 
+    def get_image(self) -> list:
+        found = self.coll.find()
+        return [item for item in found]
 
 class Market_Adapter(db):
     def __init__(self, database='Dowwin'):

@@ -9,7 +9,7 @@ This module defines a task to constantly update the database with the APIs provi
 import asyncio
 from datetime import datetime as dt
 from _crawler_apis import Ticker
-from _database_adapter import db_market
+from _adapter_database import db_market
 from __log import log, debug
 from os import makedirs
 
@@ -21,7 +21,6 @@ txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 async def task_crawler(loop, stop):
     log('*** Crawler Starting ***','ok')
     while not stop.is_set():
-        debug("Getting symbols to update")
         symbs = db_market.get_symbols_to_update()
         debug("Done")
         for symb in symbs:

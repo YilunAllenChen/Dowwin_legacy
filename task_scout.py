@@ -10,7 +10,7 @@ This module finds stock symbols that are not in the database and fill them in.
 import asyncio
 from datetime import datetime as dt
 from _static_data import stock_symbols
-from _database_adapter import db_market
+from _adapter_database import db_market
 from _crawler_apis import Ticker
 from __log import log, debug
 from os import makedirs

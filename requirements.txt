@@ -6,3 +6,4 @@ dnspython
 requests
 pandas
 matplotlib
+motor
