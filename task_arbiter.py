@@ -26,6 +26,6 @@ async def task_arbiter(loop, stop):
             added += 1
         debug('Arbiter: Added {} new trade bots into the forest'.format(added))
 
-        await asyncio.wait({asyncio.sleep(5), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
+        await asyncio.wait({asyncio.sleep(60), stop.wait()}, return_when=asyncio.FIRST_COMPLETED)
     log("*** Arbiter shutting down ***", 'ok')
  

@@ -9,8 +9,7 @@ This module defines a task to constantly update the database with the APIs provi
 import asyncio
 from datetime import datetime as dt
 from _crawler_apis import Ticker
-from _adapter_database import db_market
-from _adapter_database_async import get_all_symbols
+from _adapter_database_async import async_get_all_symbols, async_update_stock
 from __log import log, debug
 from os import makedirs
 
@@ -22,23 +21,20 @@ txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 async def task_crawler(loop, stop):
     log('*** Crawler Starting ***','ok')
     while not stop.is_set():
-        symbs = await asyncio.create_task(get_all_symbols())
-        debug("Done")
+        symbs = await asyncio.create_task(async_get_all_symbols())
         for symb in symbs:
             if stop.is_set():
                 break
             try:
-                debug("Updating symb " + symb)
                 ticker = Ticker(symb)
                 await ticker.update()
-                debug("Update complete")
                 data = {
                     'Symb': symb,
                     'Info': ticker.info,
                     'Data': ticker.raw,
                     'lastUpdate': dt.now()
                 }
-                db_market.update(data,by='Symb')
+                await async_update_stock(data, by='Symb')
                 debug(f'[{dt.now()}] Data acquired for {symb}\n')
             except Exception as e:
                 debug(f'[{dt.now()}] Error occured when parsing {symb},{e}\n')

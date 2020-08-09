@@ -17,7 +17,10 @@ from task_scout import task_scout
 from task_cache_manager import task_cache_manager
 
 async def Manager():
-    
+    '''
+    Master task to start all sub tasks
+    '''
+
     loop = asyncio.get_event_loop()
     stop = asyncio.Event()
 
@@ -26,8 +29,8 @@ async def Manager():
         asyncio.create_task(task_cache_manager(stop)),
         asyncio.ensure_future(task_crawler(loop, stop)),
         asyncio.ensure_future(task_arbiter(loop, stop)),
-        asyncio.ensure_future(task_trainer(loop, stop)),
-        asyncio.ensure_future(task_scout(loop, stop)),
+        # asyncio.ensure_future(task_trainer(loop, stop)),
+        # asyncio.ensure_future(task_scout(loop, stop)),
     ]
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)

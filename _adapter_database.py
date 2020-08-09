@@ -75,44 +75,6 @@ class db():
         found = self.coll.find()
         return [item for item in found]
 
-class Market_Adapter(db):
-    def __init__(self, database='Dowwin'):
-        '''
-        An adapter for the market collection.
-
-        :param database: the database to connect to.
-        '''
-        super().__init__(database=database)
-        self.coll = self.db['market']
-
-    def get_symbols_to_update(self) -> list:
-        '''
-        Custom function to get the list of symbols to update in the market database.
-        Symbols are sorted by their last update time so the one that's the most out of date will come first.
-        '''
-        data = self.coll.find().sort('lastUpdate')
-        return [item['Symb'] for item in data]
-
-    def get(self, symb) -> dict:
-        '''
-        market adapter custom get function to get the information about a stock.
-        
-        :param symb: the stock symbol (example: Microsoft -> MSFT).
-        '''
-        try:
-            if type(symb) == list:
-                all_data = self.coll.find({'Symb': {'$in': symb}})
-                res = {}
-                for data in all_data:
-                    res[data.get('Symb')] = data.get('Info', {})
-                return res
-            data = self.coll.find_one({'Symb': symb})
-            return data['Info'] if data is not None else None
-        except Exception as e:
-            print("Error getting info. ", e)
-            raise e
-
-
 class Bots_Adapter(db):
 
     def __init__(self, database='Dowwin'):
@@ -156,5 +118,16 @@ class Bots_Adapter(db):
         '''
         return self.coll.find().limit(num).sort('nextUpdate')
     
+_db_market = client['Dowwin']['market']
+
+def get_market_image_minimal():
+    '''
+    Blocking function that gets the minimal image of the market database.
+    '''
+    cursor = _db_market.find({}, {'Symb':1, '_id': 0, 'Info': 1})
+    return [item for item in cursor]
+    
+
+
 db_market = Market_Adapter()
 db_bots = Bots_Adapter()

@@ -12,7 +12,8 @@ from random import choice, random
 from time import time as now
 from datetime import datetime, timedelta
 from _names import names
-from _adapter_database import db_bots, db_market
+from _adapter_database import db_bots
+from _adapter_database_async import async_get_stock
 from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
 from task_cache_manager import market_cache
@@ -42,20 +43,33 @@ class Tradebot():
             'nextUpdate': datetime.now(),
         })
 
-    def selfcheck(self):
-        return True
-
-    def get(self, symb):
+    def get(self, symb: str) -> dict:
+        '''
+        Let the current tradebot obtain the information of a certain stock. It will first look at the local cache. If it's a cache miss
+        then go to remote to fetch it.
+        
+        :param symb: symbol of the stock to get.
+        '''
         if symb in market_cache:
             return market_cache[symb]
         else:
-            return db_market.get(symb)
+            log("Cache miss")
+            return async_get_stock(symb)
 
-    def save(self):
+    def save(self) -> None:
+        '''
+        Save the tradebot to the remote database.
+        '''
         debug(self.stringify_bot())
         db_bots.update(self.data,by='id')
 
-    def buy(self, symb, shares):
+    def buy(self, symb: str, shares: float) -> None:
+        '''
+        Function to buy a certain number of shares of a certain stock. 
+
+        :param symb: Symbol to buy.
+        :param shares: How many shares to buy. Floats will be rounded.  
+        '''
         shares = int(shares)
         if shares <= 0:
             return
@@ -86,8 +100,13 @@ class Tradebot():
         self.data['activities'].append(
             (datetime.now(), shares, symb, stock['ask'], self.data['cash']))
 
-    # sell 'shares' number of a certain stock. Stock is of dict type containing information 'symbol', 'ask' and 'bid'.
-    def sell(self, symb, shares):
+    def sell(self, symb: str, shares: float) -> None:
+        '''
+        Function to sell a certain number of shares of a certain stock. 
+
+        :param symb: Symbol to sell.
+        :param shares: How many shares to sell. Floats will be rounded.  
+        '''
         shares = int(shares)
         stock = self.get(symb)
         pick = symb
@@ -110,7 +129,10 @@ class Tradebot():
         except Exception as e:
             log("Error occured selling stock {}. Details: {}".format(symb, e))
 
-    def evaluatePortfolio(self):
+    def evaluatePortfolio(self) -> float:
+        '''
+        Get a most up-to-date evaluation of the portfolio.
+        '''
         evalutaion = self.data['cash']
         positions = self.data['portfolio'].items()
         for position in positions:
@@ -121,9 +143,13 @@ class Tradebot():
                 evalutaion += price * position[1]['shares']
         return evalutaion
 
-    # buyEvaluate computes how many shares of a stock should you buy (If negative then don't buy of course).
-    # TODO: Develop a better evaluation algorithm.
-    def buyEvaluate(self, symb):
+
+    def buyEvaluate(self, symb: str) -> float:
+        '''
+        buyEvaluate computes how many shares of a stock you should buy (If negative then don't buy of course).
+        
+        :param symb: Symbol of the stock to evaluate
+        '''
         stock = self.get(symb)
         try:
             value = 20 * log10(stock.get('marketCap',0)) / stock.get('trailingPE', 0)
@@ -135,9 +161,13 @@ class Tradebot():
         except Exception:
             return 0
 
-    # sellEvaluate computes how many shares of a stock should you sell (If negative then don't sell of course).
-    # TODO: Develop a better evaluation algorithm.
-    def sellEvaluate(self, symb):
+    def sellEvaluate(self, symb: str) -> float:
+        '''
+        buyEvaluate computes how many shares of a stock you should buy (If negative then don't buy of course).
+        
+        :param symb: Symbol of the stock to evaluate
+        '''
+
         stock = self.get(symb)
         try:
             return (stock['bid'] - self.data['portfolio'][symb]['avgcost']) * self.data['chars']['profitmargin']/stock['bid'] * self.data['portfolio'][symb]['shares']
@@ -155,7 +185,6 @@ class Tradebot():
             self.data['lastUpdate'] = datetime.now()
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
             self.data['nextUpdate'] = self.data['lastUpdate']
-            debug(f'{self.data["id"]} starting to operate')
 
             eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
             for symb in eyeing_buys:
@@ -179,14 +208,18 @@ class Tradebot():
             self.data['evaluations'].append((now(),newEvaluation))
             self.data['value'] = newEvaluation
 
-            debug(f'{self.data["id"]} saving')
             if autosave:
                 self.save()
         except Exception as e:
             log('Error occurred during operation: {}'.format(e),'error')
 
 
-    def stringify_recent_activites(self, item=10):
+    def stringify_recent_activites(self, item=10) -> str:
+        '''
+        Get a report on the stock's recent activites
+
+        :param item: number of activities reported
+        '''
         data = self.data
         res = ''
         count = -min([len(data['activities']), item])
@@ -199,7 +232,10 @@ class Tradebot():
             res += f'[{timestamp}] {action} {shares} of {stock} at price {price}\n'
         return res
 
-    def stringify_bot(self):
+    def stringify_bot(self) -> str:
+        '''
+        Get a report of the bot's evaluations and recent activities 
+        '''
         data = self.data
         res = (f"Tradebot {data['id']} : {data['name']}. \nValue: {data['value']} | Cash: {data['cash']}\n"
         f"Recent Activites:\n\n"
