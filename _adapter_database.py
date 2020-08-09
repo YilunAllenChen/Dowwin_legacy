@@ -128,5 +128,4 @@ def get_market_image_minimal():
     return [item for item in cursor]
     
 
-
 db_bots = Bots_Adapter()
