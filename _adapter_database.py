@@ -129,5 +129,4 @@ def get_market_image_minimal():
     
 
 
-db_market = Market_Adapter()
 db_bots = Bots_Adapter()
