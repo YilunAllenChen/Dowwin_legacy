@@ -146,7 +146,7 @@ class Tradebot():
             positions = self.data['portfolio'].items()
             for position in positions:
                 price = self.get(position[0]).get('bid')
-                if price < 0.1 or price is None:
+                if price is None or price < 0.1:
                     price = position[1]['avgcost']
                 else:
                     evalutaion += price * position[1]['shares']
