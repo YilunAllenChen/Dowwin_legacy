@@ -20,7 +20,7 @@ async def task_arbiter(loop, stop):
     while not stop.is_set():
         # Add new bots until cap
         added = 0
-        for _ in range(min([20, BOT_THRESHOLD - db_bots.count()])):
+        for _ in range(min([200, BOT_THRESHOLD - db_bots.count()])):
             newbot = Tradebot()
             newbot.save()
             added += 1

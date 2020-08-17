@@ -37,8 +37,8 @@ Examples
 
 
 bots = client['Dowwin']['tradebots']
-bots = [item for item in bots.find({}, {'_id': 0, 'nextUpdate': 1})]
+bots = [item for item in bots.find({}, {'_id': 0, 'value': 1})]
 
 bins = [1000 * i + 60000 for i in range(60)]
-plot.hist([bot.get('nextUpdate') for bot in bots])
+plot.hist([bot.get('value') for bot in bots], bins=bins)
 plot.show()
