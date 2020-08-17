@@ -12,7 +12,7 @@ from random import choice, random
 from time import time as now
 from datetime import datetime, timedelta
 from _names import names
-from _adapter_database import db_bots, sync_get_stock
+from _adapter_database import sync_get_stock, sync_delete_bot, sync_update_bot
 from _adapter_database_async import async_get_stock
 from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
@@ -60,14 +60,14 @@ class Tradebot():
         Save the tradebot to the remote database.
         '''
         debug(self.stringify_bot(portfolio=False))
-        db_bots.update(self.data,by='id')
+        sync_update_bot(self.data,by='id')
 
     def delete(self):
         '''
         Delete the tradebot from the remote database.
         '''
         log(f'Deleting this bot because its portfolio has fell below the line. {self.stringify_bot()}',to_file=True)
-        db_bots.delete('id',self.data['id'])
+        sync_delete_bot('id',self.data['id'])
 
     def buy(self, symb: str, shares: float) -> None:
         '''

@@ -3,7 +3,7 @@
 #
 
 from _adapter_database_async import async_get_market_image_minimal
-from _adapter_database import get_market_image_minimal
+from _adapter_database import sync_get_market_image_minimal
 from __log import log, vlog, debug
 import asyncio
 
@@ -12,7 +12,7 @@ market_cache = {}
 async def task_cache_manager(stop):    
     log('*** Cache Manager Starting ***','ok')
     debug("Initializing cache...")
-    init_cache = get_market_image_minimal()
+    init_cache = sync_get_market_image_minimal()
     for item in init_cache:
         market_cache[item.get('Symb')] = item.get('Info')
     while not stop.is_set():

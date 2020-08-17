@@ -8,7 +8,7 @@ This module fills the forest's empty slots with randomly generated new tradebots
 
 
 from __log import log, debug
-from _adapter_database import db_bots
+from _adapter_database import sync_count_bots
 from _Trader import Tradebot
 from _global_config import BOT_THRESHOLD
 from time import sleep
@@ -20,7 +20,7 @@ async def task_arbiter(loop, stop):
     while not stop.is_set():
         # Add new bots until cap
         added = 0
-        for _ in range(min([200, BOT_THRESHOLD - db_bots.count()])):
+        for _ in range(min([200, BOT_THRESHOLD - sync_count_bots()])):
             newbot = Tradebot()
             newbot.save()
             added += 1

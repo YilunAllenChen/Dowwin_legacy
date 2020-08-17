@@ -12,7 +12,6 @@ from __log import log, vlog
 from _global_config import DB_HOST
 
 client = motor.motor_asyncio.AsyncIOMotorClient(DB_HOST)
-
 _db_market = client['Dowwin']['market']
 _db_bot = client['Dowwin']['tradebots']
 
