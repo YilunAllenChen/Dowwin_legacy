@@ -118,6 +118,10 @@ class Bots_Adapter(db):
         '''
         return self.coll.find().limit(num).sort('nextUpdate')
     
+
+
+db_bots = Bots_Adapter()
+
 _db_market = client['Dowwin']['market']
 
 def get_market_image_minimal():
@@ -127,5 +131,5 @@ def get_market_image_minimal():
     cursor = _db_market.find({}, {'Symb':1, '_id': 0, 'Info': 1})
     return [item for item in cursor]
     
-
-db_bots = Bots_Adapter()
+def sync_get_stock(symb):
+    return _db_market.find_one({'Symb': symb})['Info']

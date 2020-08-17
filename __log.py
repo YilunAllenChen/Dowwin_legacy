@@ -5,19 +5,21 @@
 '''
 This module provides printing utilities.
 '''
-
+import logging
 from datetime import datetime
-
 DEBUG = True
 
-def log(msg, status='info'):
+file_handle = f'./trainer_logs/{str(datetime.timestamp(datetime.now()))}.txt'
+f = open(file_handle,'w+')
+
+def log(msg, status='info', to_file=False):
     '''
     log is a customized print function.
     
     :param data: the data to and print.
     '''
-    if not DEBUG:
-        return    
+    if to_file:
+        f.write(f'[{datetime.now().time()}] {msg}')
     if status == 'ok':
         prefix = '[\033[92m  OK  \033[0m] '
     if status == 'error':
@@ -25,7 +27,7 @@ def log(msg, status='info'):
     if status == 'info':
         prefix = '[\033[94m INFO \033[0m] '
 
-    print('{}[{}] {}\n'.format(prefix,datetime.now().time(),msg))
+    print(f'{prefix}[{datetime.now().time()}] {msg}\n')
 
 def debug(msg):
     '''

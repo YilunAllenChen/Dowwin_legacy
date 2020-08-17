@@ -37,7 +37,6 @@ async def task_crawler(loop, stop):
                 await async_update_stock(data, by='Symb')
                 debug(f'[{dt.now()}] Data acquired for {symb}\n')
             except Exception as e:
-                debug(f'[{dt.now()}] Error occured when parsing {symb},{e}\n')
-                log('Error occured parsing {}: {}'.format(symb, e),'error')
+                log(f'[{dt.now()}] Error occured when parsing {symb},{e}\n','error',to_file=True)
             await asyncio.wait({asyncio.sleep(1.5),stop.wait()},return_when=asyncio.FIRST_COMPLETED)
     log('*** Crawler shutting down ***','ok')

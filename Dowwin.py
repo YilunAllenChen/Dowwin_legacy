@@ -7,7 +7,7 @@
 This is the entry point to the Dowwin Core system.
 '''
 import asyncio
-from __log import log
+from __log import log, f
 from _adapter_database import client
 from task_cli import task_CLI
 from task_crawler import task_crawler
@@ -35,6 +35,7 @@ async def Manager():
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)
     client.close()
+    f.close()
     return
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

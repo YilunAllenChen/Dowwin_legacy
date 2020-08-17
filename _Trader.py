@@ -12,7 +12,7 @@ from random import choice, random
 from time import time as now
 from datetime import datetime, timedelta
 from _names import names
-from _adapter_database import db_bots
+from _adapter_database import db_bots, sync_get_stock
 from _adapter_database_async import async_get_stock
 from _static_data import stock_symbols
 from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
@@ -53,15 +53,21 @@ class Tradebot():
         if symb in market_cache:
             return market_cache[symb]
         else:
-            log("Cache miss")
-            return async_get_stock(symb)
+            return sync_get_stock(symb)
 
     def save(self) -> None:
         '''
         Save the tradebot to the remote database.
         '''
-        debug(self.stringify_bot())
+        debug(self.stringify_bot(portfolio=False))
         db_bots.update(self.data,by='id')
+
+    def delete(self):
+        '''
+        Delete the tradebot from the remote database.
+        '''
+        log(f'Deleting this bot because its portfolio has fell below the line. {self.stringify_bot()}',to_file=True)
+        db_bots.delete('id',self.data['id'])
 
     def buy(self, symb: str, shares: float) -> None:
         '''
@@ -144,7 +150,7 @@ class Tradebot():
                     price = position[1]['avgcost']
                 else:
                     evalutaion += price * position[1]['shares']
-            return evalutaion
+            return round(evalutaion,2)
         except Exception as e:
             raise(f'Unable to evaluate portfolio: {e}')
 
@@ -161,7 +167,6 @@ class Tradebot():
 
             growth = 0.2 * stock.get('fiftyTwoWeekHigh', 0) / stock.get('fiftyTwoWeekLow') * \
                 3 * stock.get('beta',1)
-
             return self.data['chars']['growth'] * growth + self.data['chars']['value'] * value
         except Exception:
             return 0
@@ -186,7 +191,6 @@ class Tradebot():
             if self.data['nextUpdate'] is not None and (datetime.now() < self.data['nextUpdate']):
                 return
 
-
             self.data['lastUpdate'] = datetime.now()
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
             self.data['nextUpdate'] = self.data['lastUpdate']
@@ -194,7 +198,6 @@ class Tradebot():
             eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
             for symb in eyeing_buys:
                 self.buy(symb, self.buyEvaluate(symb)* 10)
-    
             # Maintain current portfolio and sell positions
             current_positions = list(self.data['portfolio'].keys())
             if len(current_positions) > 0:   
@@ -206,7 +209,7 @@ class Tradebot():
 
             # If below threshold, kill itself. 
             if newEvaluation < ELIMINATION_THRESHOLD:
-                db_bots.delete('id',self.data['id'])
+                self.delete()
                 return
 
 
@@ -226,7 +229,7 @@ class Tradebot():
         :param item: number of activities reported
         '''
         data = self.data
-        res = ''
+        res = '\nRecent Activities: \n\n'
         count = -min([len(data['activities']), item])
         for item in data['activities'][count::]:
             timestamp = str(item[0])
@@ -237,12 +240,31 @@ class Tradebot():
             res += f'[{timestamp}] {action} {shares} of {stock} at price {price}\n'
         return res
 
-    def stringify_bot(self) -> str:
+    def stringify_portfolio(self) -> str:
+        value = self.data['value']
+        res = '\nPortfolio: \n\n'
+        portfolio = self.data['portfolio']
+        for position in portfolio:
+            shares = portfolio[position]["shares"]
+            avgcost = portfolio[position]["avgcost"]
+            position_value = shares * avgcost
+            diversity = str(round(position_value / value * 100, 2)) + '%'
+            res += f'{position}: {shares} shares at {avgcost}, total value: {position_value}, portfolio diversity: {diversity}\n'
+        return res
+
+    def stringify_bot(self, activites=True, portfolio=True) -> str:
         '''
         Get a report of the bot's evaluations and recent activities 
         '''
         data = self.data
-        res = (f"Tradebot {data['id']} : {data['name']}. \nValue: {data['value']} | Cash: {data['cash']}\n"
-        f"Recent Activites:\n\n"
-        f"{self.stringify_recent_activites()}")
+        res = f"Tradebot {data['id']} : {data['name']}. \nValue: {data['value']} | Cash: {data['cash']}\n"
+        if activites:
+            res += self.stringify_recent_activites()
+        if portfolio:
+            res += self.stringify_portfolio()
         return res
+
+test_bot = Tradebot()
+test_bot.operate(autosave=True)
+log(test_bot.stringify_bot(portfolio=True))
+test_bot.delete()
