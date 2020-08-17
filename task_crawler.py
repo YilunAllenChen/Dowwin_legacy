@@ -28,6 +28,8 @@ async def task_crawler(loop, stop):
             try:
                 ticker = Ticker(symb)
                 await ticker.update()
+                if ticker.info is None:
+                    raise Exception(f"Info of {symb} is None - Can't process this.")
                 data = {
                     'Symb': symb,
                     'Info': ticker.info,
@@ -40,3 +42,5 @@ async def task_crawler(loop, stop):
                 log(f'[{dt.now()}] Error occured when parsing {symb},{e}\n','error',to_file=True)
             await asyncio.wait({asyncio.sleep(1.5),stop.wait()},return_when=asyncio.FIRST_COMPLETED)
     log('*** Crawler shutting down ***','ok')
+
+

@@ -263,8 +263,3 @@ class Tradebot():
         if portfolio:
             res += self.stringify_portfolio()
         return res
-
-test_bot = Tradebot()
-test_bot.operate(autosave=True)
-log(test_bot.stringify_bot(portfolio=True))
-test_bot.delete()

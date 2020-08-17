@@ -39,7 +39,7 @@ class Ticker():
         html = get(url=self.info_url, proxies=proxy).text
         return html
 
-    async def update(self, proxy=None) -> dict:
+    async def update(self, proxy=None):
         '''
         function runs the get function and parse it to extract the useful information, then store
         it into self.raw, self.info and self.reco.

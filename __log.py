@@ -7,8 +7,10 @@ This module provides printing utilities.
 '''
 import logging
 from datetime import datetime
+from os import makedirs
 DEBUG = True
 
+makedirs('trainer_logs', exist_ok=True)
 file_handle = f'./trainer_logs/{str(datetime.timestamp(datetime.now()))}.txt'
 f = open(file_handle,'w+')
 
