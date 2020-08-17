@@ -28,7 +28,7 @@ _db_market = client['Dowwin']['market']
 _db_bots = client['Dowwin']['tradebots']
 _db_logs = client['Dowwin']['logs']
 
-def upload_log(filepath)-> None:
+def sync_upload_log(filepath)-> None:
     with open(filepath) as f:
         _db_logs.insert_one({filepath: f.readlines()})
 
