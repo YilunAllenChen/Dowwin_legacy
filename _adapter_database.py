@@ -28,10 +28,17 @@ _db_market = client['Dowwin']['market']
 _db_bots = client['Dowwin']['tradebots']
 _db_logs = client['Dowwin']['logs']
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                                    LOGGING
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
 def sync_upload_log(filepath)-> None:
     with open(filepath) as f:
         _db_logs.insert_one({filepath: f.readlines()})
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                                    Bot
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def sync_update_bot(doc, by) -> None:
     '''
     Generic update function.
@@ -60,6 +67,9 @@ def sync_count_bots() -> int:
 def sync_get_bots_sorted_by_next_update(num=100) -> list:
     return _db_bots.find().limit(num).sort('nextUpdate')
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                                    MARKET
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 def sync_get_market_image_minimal():
     '''
     Blocking function that gets the minimal image of the market database.

@@ -15,6 +15,9 @@ client = motor.motor_asyncio.AsyncIOMotorClient(DB_HOST)
 _db_market = client['Dowwin']['market']
 _db_bot = client['Dowwin']['tradebots']
 
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+                                                    MARKET
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 async def async_get_market_image_minimal() -> list:
     '''
     Obtain a minimal image of the market collection.
