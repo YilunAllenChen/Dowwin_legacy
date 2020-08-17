@@ -95,8 +95,9 @@ class Tradebot():
                     'shares': shares, 'avgcost': stock['ask']}
             self.data['cash'] -= trans
         except Exception as e:
-            print("Error buying, ", e)
-            raise
+            log("Error occured buying stock {}. Details: {}".format(symb, e))
+            raise Exception("Error occured buying stock {}. Details: {}".format(symb, e))
+            
         self.data['activities'].append(
             (datetime.now(), shares, symb, stock['ask'], self.data['cash']))
 
@@ -128,20 +129,24 @@ class Tradebot():
                 (datetime.now(), -shares, symb, stock['bid'], self.data['cash']))
         except Exception as e:
             log("Error occured selling stock {}. Details: {}".format(symb, e))
+            raise Exception("Error occured selling stock {}. Details: {}".format(symb, e))
 
     def evaluatePortfolio(self) -> float:
         '''
         Get a most up-to-date evaluation of the portfolio.
         '''
-        evalutaion = self.data['cash']
-        positions = self.data['portfolio'].items()
-        for position in positions:
-            price = self.get(position[0])['bid']
-            if price < 0.1:
-                price = position[1]['avgcost']
-            else:
-                evalutaion += price * position[1]['shares']
-        return evalutaion
+        try:
+            evalutaion = self.data['cash']
+            positions = self.data['portfolio'].items()
+            for position in positions:
+                price = self.get(position[0])['bid']
+                if price < 0.1:
+                    price = position[1]['avgcost']
+                else:
+                    evalutaion += price * position[1]['shares']
+            return evalutaion
+        except Exception as e:
+            raise(f'Unable to evaluate portfolio: {e}')
 
 
     def buyEvaluate(self, symb: str) -> float:
