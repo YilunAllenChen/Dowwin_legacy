@@ -148,8 +148,7 @@ class Tradebot():
                 price = self.get(position[0]).get('bid')
                 if price is None or price < 0.1:
                     price = position[1]['avgcost']
-                else:
-                    evalutaion += price * position[1]['shares']
+                evalutaion += price * position[1]['shares']
             return round(evalutaion,2)
         except Exception as e:
             raise Exception(f'Unable to evaluate portfolio: {e}')

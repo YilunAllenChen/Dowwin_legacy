@@ -50,7 +50,7 @@ def sync_update_bot(doc, by) -> None:
         raise RuntimeError("Neither 'doc' nor 'by' can be None")
     _db_bots.replace_one({by: doc[by]}, doc, True)
 
-def sync_delete_bot(self, key, val) -> None:
+def sync_delete_bot(key, val) -> None:
     '''
     Generic delete function to delete one function that matches that has 'key' field equals to 'val'.
     
