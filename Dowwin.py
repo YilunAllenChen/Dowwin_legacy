@@ -36,6 +36,7 @@ async def Manager():
     ]
 
     _returns = await asyncio.gather(*tasks, return_exceptions=False)
+    sync_upload_log(LOG_PATH)
     sync_client.close()
     async_client.close()
     f.close()

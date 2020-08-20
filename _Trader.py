@@ -192,7 +192,7 @@ class Tradebot():
 
             self.data['lastUpdate'] = datetime.now()
             interval = timedelta(hours=self.data['chars']['operatinginterval'])
-            self.data['nextUpdate'] = self.data['lastUpdate']
+            self.data['nextUpdate'] = self.data['lastUpdate'] + timedelta(hours=self.data['operatinginterval'])
 
             eyeing_buys = [choice(stock_symbols) for _ in range(self.data['chars']['activeness'])]
             for symb in eyeing_buys:
