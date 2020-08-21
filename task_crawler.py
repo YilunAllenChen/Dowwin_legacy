@@ -21,7 +21,9 @@ txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 async def task_crawler(loop, stop):
     log('*** Crawler Starting ***','ok')
     while not stop.is_set():
-        symbs = await asyncio.create_task(async_get_all_symbols())
+        symbs = await asyncio.wait({asyncio.create_task(async_get_all_symbols()),stop.wait()},return_when=asyncio.FIRST_COMPLETED)
+        if stop.is_set:
+            break
         for symb in symbs:
             if stop.is_set():
                 break
