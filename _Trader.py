@@ -37,10 +37,11 @@ class Tradebot():
                 'profitmargin': random(),
                 'stoplossmargin': random(),
                 'activeness': int(random()*100),
-                'operatinginterval': 2*int(random()*72) # in hours
+                'operatinginterval': 6 + 2*int(random()*72) # in hours
             },
             'lastUpdate': datetime.now(),
             'nextUpdate': datetime.now(),
+            'created': datetime.now()
         })
 
     def get(self, symb: str) -> dict:

@@ -34,7 +34,7 @@ _db_logs = client['Dowwin']['logs']
 
 def sync_upload_log(filepath)-> None:
     with open(filepath) as f:
-        _db_logs.insert_one({filepath: f.readlines()})
+        _db_logs.insert_one({now(): f.readlines()})
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
                                                     Bot
