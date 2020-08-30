@@ -1,3 +1,9 @@
+
+import sys
+sys.path.extend(['tasks', 'adapters_apis', 'static_data', 'utility_modules'])
+
+
+
 from task_cache_manager import market_cache
 from _adapter_database import sync_get_market_image_minimal
 from __log import log

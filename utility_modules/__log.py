@@ -11,8 +11,8 @@ from os import makedirs
 DEBUG = True
 
 
-LOG_PATH = f'./trainer_logs/{str(datetime.timestamp(datetime.now()))}.txt'
-makedirs('trainer_logs', exist_ok=True)
+LOG_PATH = f'./_logs_trainer/{str(datetime.timestamp(datetime.now()))}.txt'
+makedirs('./_logs_trainer', exist_ok=True)
 f = open(LOG_PATH,'w+')
 
 def log(msg, status='info', to_file=False):

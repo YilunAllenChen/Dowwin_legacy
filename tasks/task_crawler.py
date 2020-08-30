@@ -14,8 +14,8 @@ from __log import log, debug
 from os import makedirs
 
 
-makedirs('crawler_logs', exist_ok=True)
-txt_log = open('./crawler_logs/{}.txt'.format(str(dt.now().timestamp())), 'w+')
+makedirs('./_logs_crawler', exist_ok=True)
+txt_log = open('./_logs_crawler/{}.txt'.format(str(dt.now().timestamp())), 'w+')
 
 
 async def task_crawler(loop, stop):

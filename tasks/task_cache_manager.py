@@ -8,6 +8,9 @@ from __log import log, vlog, debug
 import asyncio
 
 market_cache = {}
+from time import sleep
+sleep(3)
+market_cache = {"FAKE": 0}
 
 async def task_cache_manager(stop):    
     log('*** Cache Manager Starting ***','ok')
