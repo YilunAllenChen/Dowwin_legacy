@@ -1,26 +1,76 @@
-from _adapter_database import client
-from _adapter_database import sync_get_bots_sorted_by_next_update, sync_delete_bot
-from __log import log, vlog
-import matplotlib.pyplot as plot
-from datetime import datetime, timedelta
+from _database_adapter import db_bots, db_market
+from __log import log
+
+
+# A customized logging function, expands dictionary vertically. Feel free to add more customized functions yourselves.
+def vlog(data: dict):
+    content = '\n'
+    for key in data.keys():
+        content += f'{key} : {data[key]}\n'
+    log(content)
 
 # Test connection to db.
+db_bots.test_connection()
+log(f'**** Welcome to Dowwin Analysis Toolkit ****\n  - db_bots collection has {db_bots.count()} tradebots.\n  - db_market collection has {db_market.count()} stock data.','ok')
+
+
+
 
 '''
 Examples
+
+
+# A beautified print function.
+log("hello.")
+# vlog expands a dictionary vertically to better visualize
+vlog({'key1': 'value1', 'key2': 'value2'})
+
+
+# db_bots.get() function gives you a list of tradebots sorted based on nextUpdate timestamp, from earliest to latest
+# Parameter 'num' specifices how many tradebots you are getting.
 '''
+some_bots = db_bots.get(num=20)
 
-bots = client['Dowwin']['tradebots']
-bots = [item for item in bots.find({}, {'_id':0, 'id': 1, 'nextUpdate': 1, 'value': 1})]
+# vertically expand the 11th bot
+
+vlog(some_bots[19])
 
 
-fig, axs = plot.subplots(2,2)
-fig.suptitle('Dowwin Analysis Toolkit Dashboard')
+#log(some_bots[99]["cash"])
+#log(len(some_bots[19]["activities"]))
 
-bins_value = [100 * i + 60000 for i in range(700)]
-bins_nextUpdate = [timedelta(hours=1) * i + datetime.now() for i in range (144)]
+lsCash=[]
+lsGrowth = []
+lsValue = []
+lsProfMarg = []
+lsStopMarg = []
+lsAct = []
+lsOptInt =[] 
+for i in range(999):
+    lsCash.append(some_bots[i]["value"])
+    lsGrowth.append(some_bots[i]["chars"]['growth'])
+    lsValue.append(some_bots[i]["chars"]['value'])
+    lsProfMarg.append(some_bots[i]["chars"]['profitmargin'])
+    lsStopMarg.append(some_bots[i]["chars"]['stoplossmargin'])
+    lsAct.append(some_bots[i]["chars"]['activeness'])
+    lsOptInt.append(some_bots[i]["chars"]['operatinginterval'])
+print("The Cash list is :",lsCash)
+print("The Growth list is :",lsGrowth)
+print("The Value list is :",lsValue)
+print("The ProfMarg list is :",lsProfMarg)
+print("The StopMarg list is :",lsStopMarg)
+print("The Act list is :",lsAct)
+print("The OptInt list is :",lsOptInt)
 
-axs[0][0].hist([bot.get('value') for bot in bots], bins=bins_value)
+    
 
-axs[0][1].hist([bot.get('nextUpdate') for bot in bots], bins=bins_nextUpdate)
-plot.show()
+
+
+'''
+# db_market.get("MSFT") function gives you information about the stock abbrevieated as msft (Microsoft Inc.).
+msft = db_market.get("MSFT") 
+
+# Check the payout ratio of microsoft.
+log(msft['payoutRatio'])
+vlog(msft)
+'''
