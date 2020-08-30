@@ -11,7 +11,7 @@ import pymongo
 from time import time as now
 from os import system
 from __log import log, vlog
-from _global_config import DB_HOST
+from GLOBAL_CONFIG import DB_HOST
 from _static_data import stock_symbols
 
 

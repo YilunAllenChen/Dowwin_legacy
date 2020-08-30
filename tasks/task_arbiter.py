@@ -6,11 +6,10 @@
 This module fills the forest's empty slots with randomly generated new tradebots.
 '''
 
-
 from __log import log, debug
 from _adapter_database import sync_count_bots
 from _Trader import Tradebot
-from _global_config import BOT_THRESHOLD
+from GLOBAL_CONFIG import BOT_THRESHOLD
 from time import sleep
 import asyncio
 

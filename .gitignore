@@ -1,5 +1,5 @@
-crawler_logs/*
-trainer_logs/*
+_logs_trainer/*
+_logs_crawler/*
 __pycache__/
 
 market_data.py

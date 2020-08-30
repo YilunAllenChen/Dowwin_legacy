@@ -9,7 +9,7 @@ This module provides async-compatible utilities to interact with the database.
 import asyncio
 import motor.motor_asyncio
 from __log import log, vlog
-from _global_config import DB_HOST
+from GLOBAL_CONFIG import DB_HOST
 
 client = motor.motor_asyncio.AsyncIOMotorClient(DB_HOST)
 _db_market = client['Dowwin']['market']

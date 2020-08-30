@@ -15,7 +15,7 @@ from _names import names
 from _adapter_database import sync_get_stock, sync_delete_bot, sync_update_bot
 from _adapter_database_async import async_get_stock
 from _static_data import stock_symbols
-from _global_config import ELIMINATION_THRESHOLD, STARTING_FUND
+from GLOBAL_CONFIG import ELIMINATION_THRESHOLD, STARTING_FUND
 from task_cache_manager import market_cache
 import asyncio
 from __log import log, vlog, debug

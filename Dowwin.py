@@ -6,6 +6,10 @@
 '''
 This is the entry point to the Dowwin Core system.
 '''
+
+import sys
+sys.path.extend(['tasks', 'adapters_apis', 'static_data', 'utility_modules'])
+
 import asyncio
 from __log import log, f, LOG_PATH
 from _adapter_database import client as sync_client
