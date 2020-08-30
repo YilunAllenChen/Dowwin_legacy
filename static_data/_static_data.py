@@ -38,12 +38,18 @@ stock_symbols = [
     'TSN', 'UDR', 'ULTA', 'USB', 'UAA', 'UA', 'UNP', 'UAL', 'UNH', 'UPS', 'URI', 'UHS', 'UNM', 'VFC', 'VLO', 'VAR', 
     'VTR', 'VRSN', 'VRSK', 'VZ', 'VRTX', 'VIAC', 'V', 'VNO', 'VMC', 'WRB', 'WAB', 'WMT', 'WBA', 'DIS', 'WM', 'WAT', 
     'WEC', 'WFC', 'WELL', 'WDC', 'WU', 'WRK', 'WY', 'WHR', 'WMB', 'WLTW', 'WYNN', 'XEL', 'XRX', 'XLNX', 'XYL', 
-    'YUM', 'ZBRA', 'ZBH', 'ZION', 'ZTS'
+    'YUM', 'ZBRA', 'ZBH', 'ZION', 'ZTS',
     
     
-    
-    
-    
-    
+    # NASDAQ 100
+
+    "ATVI", "ADBE", "AMD", "ALXN", "ALGN", "GOOGL", "GOOG", "AMZN", "AMGN", "ADI", "ANSS", "AAPL", "AMAT", "ASML",
+    "ADSK", "ADP", "BIDU", "BIIB", "BMRN", "BKNG", "AVGO", "CDNS", "CDW", "CERN", "CHTR", "CHKP", "CTAS", "CSCO", 
+    "CTXS", "CTSH", "CMCSA", "CPRT", "COST", "CSX", "DXCM", "DOCU", "DLTR", "EBAY", "EA", "EXC", "EXPE", "FB", 
+    "FAST", "FISV", "FOXA", "FOX", "GILD", "IDXX", "ILMN", "INCY", "INTC", "INTU", "ISRG", "JD", "KLAC", "KHC", 
+    "LRCX", "LBTYA", "LBTYK", "LULU", "MAR", "MXIM", "MELI", "MCHP", "MU", "MSFT", "MRNA", "MNST", 
+    "NTAP", "NTES", "NFLX", "NVDA", "NXPI", "PCAR", "PAYX", "PYPL", "PEP", "QCOM", "REGN", "ROST", "SGEN", 
+    "SIRI", "SWKS", "SPLK", "SBUX", "SNPS", "TSLA", "TXN", "TCOM", "ULTA", "VRSN", "VRSK", 
+    "VRTX", "WBA", "WDAY", "WDC", "XEL", "XLNX", "ZM"
     ]
 

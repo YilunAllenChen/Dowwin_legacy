@@ -1,2 +1,0 @@
-lib/python3.6/site_packages/yfinance/base.py line 286 change to:
-self._institutional_holders = holders[0]
