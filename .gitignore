@@ -1,3 +1,5 @@
 crawler_logs/*
 trainer_logs/*
 __pycache__/
+
+market_data.py

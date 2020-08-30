@@ -1,26 +1,16 @@
-from _adapter_database import client
-from _adapter_database import sync_get_bots_sorted_by_next_update, sync_delete_bot
-from __log import log, vlog
-import matplotlib.pyplot as plot
+from task_cache_manager import market_cache
+from _adapter_database import sync_get_market_image_minimal
+from __log import log
+from pprint import pformat
 from datetime import datetime, timedelta
 
-# Test connection to db.
 
-'''
-Examples
-'''
+log("Fetching market data...")
+all_stock_data = sync_get_market_image_minimal()
+log("Data fetched. Processing...")
+market = {}
+for item in all_stock_data:
+    market[item.get('Symb')] = item.get('Info')
 
-bots = client['Dowwin']['tradebots']
-bots = [item for item in bots.find({}, {'_id':0, 'id': 1, 'nextUpdate': 1, 'value': 1})]
-
-
-fig, axs = plot.subplots(2,2)
-fig.suptitle('Dowwin Analysis Toolkit Dashboard')
-
-bins_value = [100 * i + 60000 for i in range(700)]
-bins_nextUpdate = [timedelta(hours=1) * i + datetime.now() for i in range (144)]
-
-axs[0][0].hist([bot.get('value') for bot in bots], bins=bins_value)
-
-axs[0][1].hist([bot.get('nextUpdate') for bot in bots], bins=bins_nextUpdate)
-plot.show()
+with open("market_data.py",'w') as f:
+    f.writelines(pformat(market))

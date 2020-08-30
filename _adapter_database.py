@@ -76,6 +76,12 @@ def sync_get_market_image_minimal():
     '''
     cursor = _db_market.find({}, {'Symb':1, '_id': 0, 'Info': 1})
     return [item for item in cursor]
-    
+
+def sync_get_market_image_full():
+    cursor = _db_market.find({})
+    return [item for item in cursor]
+
+
+
 def sync_get_stock(symb):
     return _db_market.find_one({'Symb': symb})['Info']
